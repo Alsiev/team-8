@@ -8,7 +8,7 @@ type ExercisePlan struct {
 	Exercises     []ExercisePlanItem `json:"exercises"`
 
 	CategoryID    uint               `json:"category_id"`
-	// Category *Category `json:"-"`
+	Category *Category `json:"-"`
 }
 
 
