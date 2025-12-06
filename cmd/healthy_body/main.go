@@ -1,21 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"healthy_body/internal/config"
+	"healthy_body/internal/models"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 
 	db := config.SetUpDatabaseConnection()
-	defer func() {
-		sqlDB, err := db.DB()
-		if err != nil {
-			log.Fatalf("Произошла ошибка при подключении к БД")
-		}
-		sqlDB.Close()
-	}()
+	server := gin.Default()
+	
+	if err:= db.AutoMigrate(
+		&models.User{},
+		&models.Category{},
+		&models.ExercisePlan{},
+		&models.ExercisePlanItem{},
+		&models.MealPlan{},
+		&models.MealPlanItem{},); err != nil {
+		log.Fatalf("не удалось выполнить миграции: %v", err)
+	}
 
-	log.Println("База данных успешно подключена!")
+	if tableList, err := db.Migrator().GetTables(); err == nil {
+		fmt.Println("tables:", tableList)
+	}
 
+
+	if err := server.Run(); err != nil {
+		log.Fatalf("не удалось запустить HTTP-сервер: %v", err)
+	}
 }
