@@ -80,8 +80,6 @@ func (r *exercisePlanRepo) DeleteExercisePlan(id uint) error {
 	return nil
 }
 
-
-
 func (r *exercisePlanRepo) CreateExercisePlanItem(item *models.ExercisePlanItem) error {
 	if item == nil {
 		r.log.Error("error in Create function exercise_plan_item_repository.go")
@@ -109,8 +107,7 @@ func (r *exercisePlanRepo) UpdateExercisePlanItem(exercise *models.ExercisePlanI
 	return r.db.Save(exercise).Error
 }
 
-
-func (r *exercisePlanRepo) DeleteExercisePlanItem(id uint) error{
+func (r *exercisePlanRepo) DeleteExercisePlanItem(id uint) error {
 	if err := r.db.Delete(&models.ExercisePlanItem{}, id).Error; err != nil {
 		r.log.Error("error in Delete function exercise_plan_item_repository.go")
 		return errors.New("error delete in db")
