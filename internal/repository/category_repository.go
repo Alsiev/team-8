@@ -9,6 +9,11 @@ import (
 )
 
 type CategoryRepo interface {
+	 Create(category *models.Category) error
+	 List() ([]models.Category, error)
+	 GetByID(id uint) (*models.Category,error)
+	 Update(category *models.Category) error
+	 Delete(id uint) error
 }
 
 type categoryRepo struct {

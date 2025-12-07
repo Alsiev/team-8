@@ -17,6 +17,7 @@ type ExercisePlanRepo interface {
 
 	CreateExercisePlanItem(item *models.ExercisePlanItem) error
 	GetAllExercisePlanItem() ([]models.ExercisePlanItem, error)
+	GetByIDExercisePlanItem(id uint) (*models.ExercisePlanItem, error)
 	UpdateExercisePlanItem(exercise *models.ExercisePlanItem) error
 	DeleteExercisePlanItem(id uint) error
 }
@@ -96,6 +97,17 @@ func (r *exercisePlanRepo) GetAllExercisePlanItem() ([]models.ExercisePlanItem, 
 		return nil, err
 	}
 	return exercises, nil
+}
+
+func (r *exercisePlanRepo) GetByIDExercisePlanItem(id uint) (*models.ExercisePlanItem, error) {
+	var exercise models.ExercisePlanItem
+
+	if err := r.db.First(&exercise, id).Error; err != nil {
+		r.log.Error("error in GetByID function exercise_plan_repository.go")
+		return nil, err
+	}
+
+	return &exercise, nil
 }
 
 func (r *exercisePlanRepo) UpdateExercisePlanItem(exercise *models.ExercisePlanItem) error {
