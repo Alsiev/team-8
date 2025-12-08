@@ -135,6 +135,7 @@ func (e *exercisePlanServices) CreatePlanItem(req models.CreateExercisePlanItemR
 		Sets:            req.Sets,
 		Reps:            req.Reps,
 		EquipmentNeeded: req.EquipmentNeeded,
+		DurationMinutes: req.DurationMinutes,
 		DayOfWeek:       req.DayOfWeek,
 		ExercisePlanID:  req.ExercisePlanID,
 	}

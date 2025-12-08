@@ -6,17 +6,17 @@ type Category struct {
 	gorm.Model
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Price       int `json:"price"`
 }
 
 type CreateCategoryRequest struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Price       int `json:"price"`
 }
 
 type UpdateCategoryRequest struct {
 	Name        *string  `json:"name"`
 	Description *string  `json:"description"`
-	Price       *float64 `json:"price"`
+	Price       *int `json:"price"`
 }

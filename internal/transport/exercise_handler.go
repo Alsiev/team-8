@@ -32,10 +32,10 @@ func (h *ExercisePlanHandler) RegisterRoutes(r *gin.Engine){
 		planGroup.DELETE("/:id", h.DeletePlan)
 
 		planGroup.POST("/planItem", h.CreatePlanItem)
-		planGroup.GET("/:planId/items", h.GetPlanItemByID)
+		planGroup.GET("/planItem/:id", h.GetPlanItemByID)
 		planGroup.GET("/planItem/", h.GetListPlanItem)
-		planGroup.PATCH("/:planId/items", h.UpdatePlanItem)
-		planGroup.DELETE("/:planId/items", h.DeletePlanItem)
+		planGroup.PATCH("/planItem/:id", h.UpdatePlanItem)
+		planGroup.DELETE("/planItem/:id", h.DeletePlanItem)
 
 	}
 }

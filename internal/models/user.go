@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type User struct {
 	gorm.Model
 	Name    string  `json:"name"`
-	Balance float64 `json:"balance"`
+	Balance int `json:"balance"`
 
 	CategoryID uint      `json:"category_id"`
 	Category   *Category `json:"-"`
@@ -17,5 +17,5 @@ type CreateUserRequest struct {
 
 type UpdateUserRequest struct {
 	Name    *string  `json:"name"`
-	Balance *float64 `json:"balance"`
+	Balance *int `json:"balance"`
 }
