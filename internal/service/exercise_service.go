@@ -10,6 +10,7 @@ import (
 type ExercisePlanServices interface {
 	CreatePlan(req models.CreateExercesicePlanRequest) (*models.ExercisePlan, error)
 	GetPlanByID(id uint) (*models.ExercisePlan, error)
+	GetPlanByIDNotPreloads(id uint) (*models.ExercisePlan, error)
 	GetListPlans() ([]models.ExercisePlan, error)
 	UpdatePlan(id uint, req models.UpdateExercesicePlanRequest) (*models.ExercisePlan, error)
 	DeletePlan(id uint) error
@@ -69,6 +70,16 @@ func (e *exercisePlanServices) GetPlanByID(id uint) (*models.ExercisePlan, error
 	return plan, nil
 }
 
+func (e *exercisePlanServices) GetPlanByIDNotPreloads(id uint) (*models.ExercisePlan, error) {
+	plan, err := e.exerciseRepo.GetByIDExercisePlan(id)
+	if err != nil {
+		e.log.Error("error GetPlanByID function in exercise_service.go")
+		return nil, err
+	}
+
+	return plan, nil
+}
+
 func (e *exercisePlanServices) GetListPlans() ([]models.ExercisePlan, error) {
 	list, err := e.exerciseRepo.GetAllExercisePlan()
 	if err != nil {
@@ -114,7 +125,7 @@ func (e *exercisePlanServices) CreatePlanItem(req models.CreateExercisePlanItemR
 		return nil, err
 	}
 
-	if _, err := e.exerciseRepo.GetByIDExercisePlan(req.ExercisePlanID); err != nil {
+	if _, err := e.exerciseRepo.GetByIDExercisePlanForNotPreload(req.ExercisePlanID); err != nil {
 		e.log.Error("error CreatePlanItem function in exercise_service.go")
 		return nil, err
 	}

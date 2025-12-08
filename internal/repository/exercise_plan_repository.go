@@ -11,6 +11,7 @@ import (
 type ExercisePlanRepo interface {
 	CreateExercisePlan(exercise *models.ExercisePlan) error
 	GetByIDExercisePlan(id uint) (*models.ExercisePlan, error)
+	GetByIDExercisePlanForNotPreload(id uint) (*models.ExercisePlan, error)
 	GetAllExercisePlan() ([]models.ExercisePlan, error)
 	UpdateExercisePlan(exercise *models.ExercisePlan) error
 	DeleteExercisePlan(id uint) error
@@ -44,6 +45,17 @@ func (r *exercisePlanRepo) CreateExercisePlan(exercise *models.ExercisePlan) err
 }
 
 func (r *exercisePlanRepo) GetByIDExercisePlan(id uint) (*models.ExercisePlan, error) {
+	var exercise models.ExercisePlan
+
+	if err := r.db.Preload("Exercises").Preload("Category").First(&exercise, id).Error; err != nil {
+		r.log.Error("error in GetByID function exercise_plan_repository.go")
+		return nil, err
+	}
+
+	return &exercise, nil
+}
+
+func (r *exercisePlanRepo) GetByIDExercisePlanForNotPreload(id uint) (*models.ExercisePlan, error) {
 	var exercise models.ExercisePlan
 
 	if err := r.db.First(&exercise, id).Error; err != nil {

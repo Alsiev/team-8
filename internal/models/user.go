@@ -13,8 +13,6 @@ type User struct {
 
 type CreateUserRequest struct {
 	Name    string  `json:"name"`
-	Balance float64 `json:"balance"`
-	// CategoryID если нужно — скажи, добавлю
 }
 
 type UpdateUserRequest struct {
