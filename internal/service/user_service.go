@@ -5,6 +5,8 @@ import (
 	"healthy_body/internal/models"
 	"healthy_body/internal/repository"
 	"log/slog"
+
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -13,17 +15,21 @@ type UserService interface {
 	GetUserByID(id uint) (*models.User, error)
 	UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error)
 	Delete(id uint) error
+
+	Payment(userID uint, categoryID uint) error
 }
 
 type userService struct {
 	userRepo repository.UserRepository
 	log      *slog.Logger
+	db       *gorm.DB
 }
 
-func NewUserService(userRepo repository.UserRepository, log *slog.Logger) UserService {
+func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB) UserService {
 	return &userService{
 		userRepo: userRepo,
 		log:      log,
+		db:       db,
 	}
 }
 
@@ -167,4 +173,44 @@ func (s *userService) Delete(id uint) error {
 	}
 
 	return nil
+}
+
+func (s *userService) Payment(userID uint, categoryID uint) error {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+
+		var user models.User
+
+		if err := tx.First(&user, userID).Error; err != nil {
+			s.log.Error("Ошибка при поиске пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при поиске пользователя %w", err)
+		}
+
+		var category models.Category
+
+		if err := tx.First(&category, categoryID).Error; err != nil {
+			s.log.Error("Ошибка при поиске категории",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при поиске категории %w", err)
+		}
+
+		if user.Balance < category.Price {
+			s.log.Warn("Недостаточно средств на счету")
+			return fmt.Errorf("недостаточно средств на счету")
+		}
+
+		user.Balance -= category.Price
+		user.CategoryID = categoryID
+
+		if err := tx.Save(&user).Error; err != nil {
+			s.log.Error("Ошибка при сохранении пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при сохранении пользователя %w", err)
+		}
+
+		s.log.Info("Оплата прошла успешно")
+
+		return nil
+	})
+	return err
 }
