@@ -12,7 +12,7 @@ type User struct {
 }
 
 type CreateUserRequest struct {
-	Name string `json:"name"`
+	Name    string  `json:"name"`
 }
 
 type UpdateUserRequest struct {
