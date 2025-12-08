@@ -37,20 +37,15 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 
 	}
 
-	if req.Balance < 0 {
-		s.log.Warn("Баланс не может быть отрицательным")
-		return nil, fmt.Errorf("баланс не может быть отрицательным")
-	}
-
 	newUser := &models.User{
-		Name:    req.Name,
-		Balance: req.Balance,
+		Name:       req.Name,
+		Balance:    0,
+		CategoryID: 0,
 	}
 
 	if err := s.userRepo.Create(newUser); err != nil {
 		s.log.Error("Ошибка при создании пользователя",
 			"имя", req.Name,
-			"баланс", req.Balance,
 			"error", err.Error())
 
 		return nil, fmt.Errorf("ошибка при создании пользователя: %w", err)
@@ -59,7 +54,8 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 	s.log.Info("Пользователь создан",
 		"id", newUser.ID,
 		"имя", req.Name,
-		"баланс", req.Balance)
+		"баланс", 0,
+		"категория", 0)
 
 	return newUser, nil
 

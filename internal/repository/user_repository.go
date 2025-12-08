@@ -33,7 +33,6 @@ func (r *gormUserRepository) Create(req *models.User) error {
 	if err := r.db.Create(req).Error; err != nil {
 		r.log.Error("Ошибка при создании пользователя в слое репозиторий",
 			"name", req.Name,
-			"balance", req.Balance,
 			"error", err.Error(),
 		)
 
@@ -42,7 +41,8 @@ func (r *gormUserRepository) Create(req *models.User) error {
 
 	r.log.Info("Пользователь успешно создан",
 		"имя", req.Name,
-		"балланс", req.Balance,
+		"баланс", 0,
+		"категория", 0,
 	)
 
 	return nil
