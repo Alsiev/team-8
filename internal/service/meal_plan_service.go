@@ -40,8 +40,10 @@ func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*mod
 		return nil, errors.New("total days must be greater than zero")
 	}
 	mealPlan := models.MealPlan{
-		CategoryID: req.CategoryID,
-		TotalDays:  req.TotalDays,
+		Name:        req.Name,
+		Description: req.Description,
+		CategoryID:  req.CategoryID,
+		TotalDays:   req.TotalDays,
 	}
 
 	if err := s.mealPlans.Create(&mealPlan); err != nil {
@@ -54,7 +56,7 @@ func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*mod
 func (s *mealPlanService) ListMealPlan() ([]models.MealPlan, error) {
 	mealPlans, err := s.mealPlans.List()
 	if err != nil {
-		s.logger.Error("failet to fetch meal plans")
+		s.logger.Error("failed to fetch meal plans")
 		return nil, err
 	}
 
@@ -71,6 +73,14 @@ func (s *mealPlanService) UpdateMealPlan(id uint, req *models.UpdateMealPlanRequ
 	if err != nil {
 		s.logger.Error("service: meal plan not found")
 		return nil, err
+	}
+
+	if req.Name != nil {
+		mealPlan.Name = *req.Name
+	}
+
+	if req.Description != nil {
+		mealPlan.Description = *req.Description
 	}
 
 	if req.CategoryID != nil {

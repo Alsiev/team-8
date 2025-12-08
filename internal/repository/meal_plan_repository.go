@@ -58,7 +58,7 @@ func (r *gormMealPlanRepository) Update(mealPlan *models.MealPlan) error {
 		return errors.New("meal plan is nil")
 	}
 	err := r.db.Model(&models.MealPlan{}).Where("id =?", mealPlan.ID).
-		Select("CategoryID", "TotalDays").Updates(mealPlan).Error
+		Select("Name", "Description", "CategoryID", "TotalDays").Updates(mealPlan).Error
 
 	if err != nil {
 		r.logger.Error("failed to update meal plan", "id", mealPlan.ID, "err", err)

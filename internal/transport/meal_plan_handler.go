@@ -25,7 +25,11 @@ func NewMealPlanHandler(mealPlans service.MealPlanService, logger *slog.Logger) 
 func (h *MealPlanHandler) RegisterRoutes(r *gin.Engine) {
 	mealPlans := r.Group("/mealPlans")
 	{
-		mealPlans.POST("", h.Create)
+		mealPlans.POST("/", h.Create)
+		mealPlans.GET("/", h.GetAllMealPlans)
+		mealPlans.GET("/:id", h.GetMealPlanByID)
+		mealPlans.PATCH("/:id", h.Update)
+		mealPlans.DELETE("/:id", h.Delete)
 	}
 }
 
@@ -83,7 +87,7 @@ func (h *MealPlanHandler) Update(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("hadnler: meal plan updated successfully", "id", id)
+	h.logger.Info("handler: meal plan updated successfully", "id", id)
 	c.JSON(http.StatusOK, mealPlan)
 }
 
@@ -120,6 +124,6 @@ func (h *MealPlanHandler) GetMealPlanByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.logger.Info("hadnler: fetch to meal plan successfully")
+	h.logger.Info("handler: fetch to meal plan successfully")
 	c.JSON(http.StatusOK, mealPlan)
 }
