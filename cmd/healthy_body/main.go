@@ -29,11 +29,12 @@ func main() {
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
 	categoryRepo := repository.NewCategoryRepo(db, logger)
-	planRepo := repository.NewExercisePlanRepo(db , logger)
+	planRepo := repository.NewExercisePlanRepo(db, logger)
+	userRepo := repository.NewUserRepository(db, logger)
 
 	categoryServices := service.NewCategoryServices(categoryRepo, logger)
-	planServices := service.NewExercisePlanServices(planRepo,logger, categoryServices)
-
+	planServices := service.NewExercisePlanServices(planRepo, logger, categoryServices)
+	userService := service.NewUserService(userRepo, logger, db)
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {
 		fmt.Println("tables:", tableList)
@@ -44,6 +45,7 @@ func main() {
 		logger,
 		categoryServices,
 		planServices,
+		userService,
 	)
 
 	if err := server.Run(); err != nil {
