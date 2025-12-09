@@ -12,6 +12,7 @@ type CategoryRepo interface {
 	 Create(category *models.Category) error
 	 List() ([]models.Category, error)
 	 GetByID(id uint) (*models.Category,error)
+	 GetWithPlans(id uint) (*models.Category, error)
 	 Update(category *models.Category) error
 	 Delete(id uint) error
 }
@@ -58,6 +59,20 @@ func (c *categoryRepo) GetByID(id uint) (*models.Category,error) {
 	}
 
 	return  &category, nil
+}
+
+
+func (c *categoryRepo) GetWithPlans(id uint) (*models.Category, error) {
+    var category models.Category
+
+    err := c.db.Preload("ExercisePlans.Exercises").Preload("MealPlans.Meals").First(&category, id).Error
+
+    if err != nil {
+        c.log.Error("error in GetWithPlans function category_repository.go", "err", err)
+        return nil, err
+    }
+
+    return &category, nil
 }
 
 

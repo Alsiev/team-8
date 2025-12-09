@@ -4,13 +4,15 @@ import "gorm.io/gorm"
 
 type ExercisePlan struct {
 	gorm.Model
-	DurationWeeks int                `json:"duration_weeks"`
-	Exercises     []ExercisePlanItem `json:"exercises"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	DurationWeeks int    `json:"duration_weeks"`
 
-	CategoryID    uint               `json:"category_id"`
-	Category *Category `json:"-"`
+	Exercises []ExercisePlanItem `json:"exercises"`
+
+	CategoryID uint      `json:"category_id"`
+	Category   *Category `json:"-"`
 }
-
 
 type CreateExercesicePlanRequest struct {
 	CategoryID    uint `json:"category_id"`

@@ -55,6 +55,16 @@ func (c *categoryServices) CreateCategory(req models.CreateCategoryRequest) (*mo
 	 return  category, nil
 }
 
+func (c *categoryServices) GetWithPlans(id uint) (*models.Category, error) {
+    cat , err := c.category.GetWithPlans(id)
+	if err != nil {
+		c.log.Error("error preloads or id")
+		return nil ,err
+	}
+   
+	return cat, nil
+}
+
 
 func (c *categoryServices) GetCategoryList()([]models.Category,error){
 	list , err := c.category.List()
