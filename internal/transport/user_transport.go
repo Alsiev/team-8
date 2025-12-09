@@ -175,11 +175,44 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 }
 
-// func (h *UserHandler) Payment(c *gin.Context) {
-// 	var userId models.User
+func (h *UserHandler) Payment(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	categoryIDstr := c.Param("categoryID")
 
-// 	h.user.Payment()
-// }
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	categoryID, err := strconv.ParseUint(categoryIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID категории")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	if err := h.user.Payment(uint(userID), uint(categoryID)); err != nil {
+		h.log.Error("Ошибка при оплате",
+			"error", err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	h.log.Info("Оплата проошла успешно")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "оплата прощла успешно",
+	})
+}
 
 func (h *UserHandler) UserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
