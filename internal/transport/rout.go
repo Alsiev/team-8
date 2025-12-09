@@ -16,10 +16,10 @@ func RegisterRoutes(
 ) {
 
 	categoryHandler := NewCategoryHandler(category, log)
-	planHandler := NewExercisePlanHandler(plan, log)
-	userHandler := NewUserHandler(user, log)
-
+	planHandler := NewExercisePlanHandler(plan,log)
+	bmiHand:= NewBmiHandler(log)
 	categoryHandler.RegisterRoutes(router)
 	planHandler.RegisterRoutes(router)
-	userHandler.UserRoutes(router)
+	bmiHand.RegisterRoutes(router)
 }
+
