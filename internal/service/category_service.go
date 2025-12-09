@@ -11,6 +11,7 @@ type CategoryServices interface {
 	CreateCategory(req models.CreateCategoryRequest) (*models.Category, error)
 	GetCategoryList()([]models.Category,error)
 	GetCategoryByID(id uint) (*models.Category,error)
+	GetWithPlans(id uint) (*models.Category, error)
 	UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Category, error)
 	DeleteCategory(id uint) error
 }
