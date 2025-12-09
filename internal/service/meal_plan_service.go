@@ -18,15 +18,18 @@ type MealPlanService interface {
 type mealPlanService struct {
 	mealPlans repository.MealPlanRepository
 	logger    *slog.Logger
+	category  CategoryServices
 }
 
 func NewMealPlanService(
 	mealPlans repository.MealPlanRepository,
 	logger *slog.Logger,
+	category CategoryServices,
 ) MealPlanService {
 	return &mealPlanService{
 		mealPlans: mealPlans,
 		logger:    logger,
+		category:  category,
 	}
 }
 
@@ -39,6 +42,12 @@ func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*mod
 		s.logger.Error("invalid total_days")
 		return nil, errors.New("total days must be greater than zero")
 	}
+
+	if _, err := s.category.GetCategoryByID(req.CategoryID); err != nil {
+		s.logger.Error("error GetCategoryByID function in exercise_service.go")
+		return nil, err
+	}
+
 	mealPlan := models.MealPlan{
 		Name:        req.Name,
 		Description: req.Description,

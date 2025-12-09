@@ -15,7 +15,7 @@ type MealPlanItemHandler struct {
 	logger        *slog.Logger
 }
 
-func NewMealPlanItemHandler(mealPlanItems service.MealPlanItemsService, logger *slog.Logger) MealPlanHandler {
+func NewMealPlanItemHandler(mealPlanItems service.MealPlanItemsService, logger *slog.Logger) *MealPlanItemHandler {
 	return &MealPlanItemHandler{
 		mealPlanItems: mealPlanItems,
 		logger:        logger,

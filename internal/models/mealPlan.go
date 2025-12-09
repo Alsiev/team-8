@@ -9,6 +9,7 @@ type MealPlan struct {
 	CategoryID  uint           `json:"category_id"`
 	TotalDays   int            `json:"total_days"`
 	Meals       []MealPlanItem `json:"meals"`
+	Category    *Category      `json:"-"`
 }
 
 type CreateMealPlanRequest struct {
