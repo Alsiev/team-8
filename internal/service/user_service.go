@@ -5,6 +5,7 @@ import (
 	"healthy_body/internal/models"
 	"healthy_body/internal/repository"
 	"log/slog"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -17,19 +18,22 @@ type UserService interface {
 	Delete(id uint) error
 
 	Payment(userID uint, categoryID uint) error
+	SubPayment(userID, subID uint) error
 }
 
 type userService struct {
 	userRepo repository.UserRepository
 	log      *slog.Logger
 	db       *gorm.DB
+	sub      SubscriptionService
 }
 
-func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB) UserService {
+func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB, sub SubscriptionService) UserService {
 	return &userService{
 		userRepo: userRepo,
 		log:      log,
 		db:       db,
+		sub:      sub,
 	}
 }
 
@@ -213,4 +217,43 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		return nil
 	})
 	return err
+}
+
+func (s *userService) SubPayment(userID, subID uint) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+
+		var user models.User
+		if err := tx.First(&user, userID).Error; err != nil {
+			return fmt.Errorf("user not found: %w", err)
+		}
+
+		sub, err := s.sub.GetSubByID(subID)
+		if err != nil {
+			return fmt.Errorf("subscription not found: %w", err)
+		}
+
+		if user.Balance < sub.Price {
+			return fmt.Errorf("недостаточно средств")
+		}
+
+		user.Balance -= sub.Price
+
+		if err := tx.Save(&user).Error; err != nil {
+			return fmt.Errorf("cannot update user balance: %w", err)
+		}
+
+		userSub := &models.UserSubscription{
+			UserID:         userID,
+			SubscriptionID: subID,
+			StartDate:      time.Now(),
+			EndDate:        time.Now().Add(time.Hour * 24 * time.Duration(sub.DurationDays)),
+			IsActive:       true,
+		}
+
+		if err := tx.Create(userSub).Error; err != nil {
+			return fmt.Errorf("cannot create user subscription: %w", err)
+		}
+
+		return nil
+	})
 }

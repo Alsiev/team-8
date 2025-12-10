@@ -33,13 +33,16 @@ func main() {
 
 	mealPlanRepo := repository.NewMealPlanRepository(db, logger)
 	mealPlanItemRepo := repository.NewMealPlanItemRepository(db, logger)
+	subRepo := repository.NewSubscriptionRepo(db, logger)
 
 	categoryServices := service.NewCategoryServices(categoryRepo, logger)
 	planServices := service.NewExercisePlanServices(planRepo, logger, categoryServices)
 	mealPlanService := service.NewMealPlanService(mealPlanRepo, logger, categoryServices)
 	mealPlanItemService := service.NewMealPlanItemsService(mealPlanItemRepo, logger)
 	userRepo := repository.NewUserRepository(db, logger)
-	userService := service.NewUserService(userRepo, logger, db)
+	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
+	userService := service.NewUserService(userRepo, logger, db, subService)
+
 
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {
@@ -54,6 +57,7 @@ func main() {
 		mealPlanService,
 		mealPlanItemService,
 		userService,
+		subService,
 	)
 
 	if err := server.Run(); err != nil {

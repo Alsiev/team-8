@@ -9,6 +9,9 @@ type User struct {
 
 	CategoryID uint      `json:"category_id"`
 	Category   *Category `json:"-"`
+
+	UserSubscriptions []UserSubscription `json:"-"`
+	UserPlans []UserPlan `json:"-"`
 }
 
 type CreateUserRequest struct {

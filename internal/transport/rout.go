@@ -15,8 +15,10 @@ func RegisterRoutes(
 	mealPlan service.MealPlanService,
 	mealPlanItem service.MealPlanItemsService,
 	user service.UserService,
+	sub service.SubscriptionService,
 ) {
 
+	subHandler := NewSubscriptionHandler(sub, log)
 	categoryHandler := NewCategoryHandler(category, log)
 	planHandler := NewExercisePlanHandler(plan, log)
 	bmiHand := NewBmiHandler(log)
@@ -29,5 +31,7 @@ func RegisterRoutes(
 	planHandler.RegisterRoutes(router)
 	bmiHand.RegisterRoutes(router)
 	userHandler.UserRoutes(router)
+	subHandler.RegisterRoutes(router)
+
 
 }
