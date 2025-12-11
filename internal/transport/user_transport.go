@@ -349,7 +349,7 @@ func (h *UserHandler) UserRoutes(r *gin.Engine) {
 		userGroup.GET("/:id", h.GetUserByID)
 		userGroup.GET("/plan/:id", h.GetUserWithPlan)
 		userGroup.GET("/userplans/:id", h.GetUserCategory)
-		userGroup.GET("usersub/:id", h.GetUserByID)
+		userGroup.GET("usersub/:userID", h.GetUserByID)
 		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}

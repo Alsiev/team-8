@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	// "gorm.io/gorm"
 )
 
 func main() {
@@ -19,18 +20,22 @@ func main() {
 	server := gin.Default()
 
 	if err := db.AutoMigrate(
-		&models.User{},
 		&models.Category{},
+		&models.User{},
+		&models.UserPlan{},
+		&models.UserSubscription{},
+		&models.Subscription{},
 		&models.ExercisePlan{},
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
-		&models.Subscription{},
-		&models.UserPlan{},
-		&models.UserSubscription{}); err != nil {
+	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
+
+	// Исправляем возможные неправильные внешние ключи, созданные старыми тегами GORM
+	// fixUserPlansConstraints(db)
 	categoryRepo := repository.NewCategoryRepo(db, logger)
 	planRepo := repository.NewExercisePlanRepo(db, logger)
 
@@ -66,3 +71,19 @@ func main() {
 		log.Fatalf("не удалось запустить HTTP-сервер: %v", err)
 	}
 }
+
+// fixUserPlansConstraints гарантирует, что внешние ключи в user_plans указывают на корректные столбцы
+// func fixUserPlansConstraints(db *gorm.DB) {
+// 	// На некоторых ранних версиях модели FK "fk_user_plans_category" мог ссылаться на user_id
+// 	// Переопределяем его на (category_id) -> categories(id)
+// 	db.Exec(`ALTER TABLE user_plans DROP CONSTRAINT IF EXISTS fk_user_plans_category;`)
+// 	db.Exec(`ALTER TABLE user_plans ADD CONSTRAINT fk_user_plans_category
+// 			 FOREIGN KEY (category_id) REFERENCES categories(id)
+// 			 ON UPDATE CASCADE ON DELETE RESTRICT;`)
+
+// 	// Обновим и связь с пользователем на всякий случай: (user_id) -> users(id)
+// 	db.Exec(`ALTER TABLE user_plans DROP CONSTRAINT IF EXISTS fk_user_plans_user;`)
+// 	db.Exec(`ALTER TABLE user_plans ADD CONSTRAINT fk_user_plans_user
+// 			 FOREIGN KEY (user_id) REFERENCES users(id)
+// 			 ON UPDATE CASCADE ON DELETE CASCADE;`)
+// }
