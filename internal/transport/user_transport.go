@@ -190,7 +190,6 @@ func (h *UserHandler) PaymentToAnother(c *gin.Context) {
 		return
 	}
 
-
 	categoryID, err := strconv.ParseUint(categoryIDstr, 10, 64)
 
 	if err != nil {
@@ -292,8 +291,8 @@ func (h *UserHandler) GetUserWithPlan(c *gin.Context) {
 }
 
 func (h *UserHandler) GetUserCategory(c *gin.Context) {
-	userIDstr := c.Param("userID")
-	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+	idStr := c.Param("id")
+	userID, err := strconv.ParseUint(idStr, 10, 64)
 
 	if err != nil {
 		h.log.Warn("Ошибка при вводе ID")
@@ -349,7 +348,7 @@ func (h *UserHandler) UserRoutes(r *gin.Engine) {
 		userGroup.GET("/:id", h.GetUserByID)
 		userGroup.GET("/plan/:id", h.GetUserWithPlan)
 		userGroup.GET("/userplans/:id", h.GetUserCategory)
-		userGroup.GET("usersub/:userID", h.GetUserByID)
+		userGroup.GET("/usersub/:userID", h.GetUserSubs)
 		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}
