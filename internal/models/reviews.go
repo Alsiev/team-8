@@ -5,28 +5,28 @@ import "gorm.io/gorm"
 type Reviews struct {
 	gorm.Model
 
-	CategoryID uint      `json:"-"`
-	Category   *Category `json:"-" gorm:"foreignKey:CategoryID"`
-	UserID     uint      `json:"-"`
-	User       *User     `json:"-" gorm:"foreignKey:UserID"`
-	Rating     int       `json:"-"`
-	Content    string    `json:"-" `
+	CategoriesID uint        `json:"categories_id"`
+	Categories   *Categories `json:"-"`
+	UserID       uint        `json:"-"`
+	User         *User       `json:"-" gorm:"foreignKey:UserID"`
+	Rating       int         `json:"-"`
+	Content      string      `json:"-" `
 }
 
 type GetReview struct {
-	ID         uint   `json:"id"`
-	CategoryID uint   `json:"category_id"`
-	UserID     uint   `json:"user_id"`
-	Rating     int    `json:"rating"`
-	Content    string `json:"content"`
-	Date       string `json:"date"`
+	ID           uint   `json:"id"`
+	CategoriesID uint   `json:"categories_id"`
+	UserID       uint   `json:"user_id"`
+	Rating       int    `json:"rating"`
+	Content      string `json:"content"`
+	Date         string `json:"date"`
 }
 
 type CreateReviewRequest struct {
-	CategoryID uint   `json:"category_id"`
-	UserID     uint   `json:"user_id"`
-	Rating     int    `json:"rating"`
-	Content    string `json:"content"`
+	CategoriesID uint   `json:"categories_id"`
+	UserID       uint   `json:"user_id"`
+	Rating       int    `json:"rating"`
+	Content      string `json:"content"`
 }
 
 type UpdateReviewRequest struct {

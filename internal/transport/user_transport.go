@@ -181,18 +181,9 @@ func (h *UserHandler) PaymentToAnother(c *gin.Context) {
 	secondUserIDstr := c.Param("secondUserID")
 
 	userID, err := strconv.ParseUint(userIDstr, 10, 64)
-	secondUserID, err := strconv.ParseUint(secondUserIDstr, 10, 64)
 
 	if err != nil {
 		h.log.Error("Ошибка при получении ID второго пользователя")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"err": err,
-		})
-		return
-	}
-
-	if err != nil {
-		h.log.Error("Ошибка при получении ID пользователя")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err": err,
 		})
@@ -203,6 +194,16 @@ func (h *UserHandler) PaymentToAnother(c *gin.Context) {
 
 	if err != nil {
 		h.log.Error("Ошибка при получении ID категории")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	secondUserID, err := strconv.ParseUint(secondUserIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err": err,
 		})
@@ -289,15 +290,99 @@ func (h *UserHandler) GetUserWithPlan(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, user)
 }
 
+func (h *UserHandler) GetUserCategory(c *gin.Context) {
+	idStr := c.Param("id")
+	userID, err := strconv.ParseUint(idStr, 10, 64)
+
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	user, err := h.user.GetUserCategory(uint(userID))
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
+func (h *UserHandler) GetUserSubs(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	user, err := h.user.GetUserSub(uint(userID))
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
+func (h *UserHandler) SubPayment(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	subIDstr := c.Param("subID")
+	subID, err := strconv.ParseUint(subIDstr, 10, 64)
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID подписки")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+	if err := h.user.SubPayment(uint(userID), uint(subID)); err != nil {
+		h.log.Error("Ошибка при оплате подписки")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"message": "подписка успешно оформлена",
+	})
+}
+
 func (h *UserHandler) UserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/", h.Create)
 		userGroup.POST("/payment/:userID/:categoryID", h.Payment)
 		userGroup.POST("/present/:userID/:categoryID/:secondUserID", h.PaymentToAnother)
+		userGroup.POST("sub/:userID/:subID", h.SubPayment)
 		userGroup.GET("/", h.GetAllUser)
 		userGroup.GET("/:id", h.GetUserByID)
 		userGroup.GET("/plan/:id", h.GetUserWithPlan)
+		userGroup.GET("/userplans/:id", h.GetUserCategory)
+		userGroup.GET("/usersub/:userID", h.GetUserSubs)
 		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}

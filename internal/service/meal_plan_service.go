@@ -34,8 +34,8 @@ func NewMealPlanService(
 }
 
 func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*models.MealPlan, error) {
-	if req.CategoryID == 0 {
-		s.logger.Error("invalid category id", "id", req.CategoryID)
+	if *req.CategoriesID == 0 {
+		s.logger.Error("invalid category id", "id", req.CategoriesID)
 		return nil, errors.New("category id is required")
 	}
 	if req.TotalDays <= 0 {
@@ -43,7 +43,7 @@ func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*mod
 		return nil, errors.New("total days must be greater than zero")
 	}
 
-	if _, err := s.category.GetCategoryByID(req.CategoryID); err != nil {
+	if _, err := s.category.GetCategoryByID(*req.CategoriesID); err != nil {
 		s.logger.Error("error GetCategoryByID function in exercise_service.go")
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (s *mealPlanService) CreateMealPlan(req models.CreateMealPlanRequest) (*mod
 	mealPlan := models.MealPlan{
 		Name:        req.Name,
 		Description: req.Description,
-		CategoryID:  req.CategoryID,
+		CategoriesID:  req.CategoriesID,
 		TotalDays:   req.TotalDays,
 	}
 
@@ -92,8 +92,8 @@ func (s *mealPlanService) UpdateMealPlan(id uint, req *models.UpdateMealPlanRequ
 		mealPlan.Description = *req.Description
 	}
 
-	if req.CategoryID != nil {
-		mealPlan.CategoryID = *req.CategoryID
+	if req.CategoriesID != nil {
+		mealPlan.CategoriesID = req.CategoriesID
 	}
 	if req.TotalDays != nil {
 		mealPlan.TotalDays = *req.TotalDays

@@ -31,7 +31,7 @@ func NewEmailNotificationService(
 	}
 }
 
-func (s *EmailNotificationService) SendPaymentSuccess(user *models.User, category *models.Category) error {
+func (s *EmailNotificationService) SendPaymentSuccess(user *models.User, category *models.Categories) error {
 
 	if user.Email == "" {
 		s.logger.Warn("у пользователя нет email", "user_id", user.ID)

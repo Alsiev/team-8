@@ -9,11 +9,11 @@ import (
 )
 
 type CategoryRepo interface {
-	 Create(category *models.Category) error
-	 List() ([]models.Category, error)
-	 GetByID(id uint) (*models.Category,error)
-	 GetWithPlans(id uint) (*models.Category, error)
-	 Update(category *models.Category) error
+	 Create(category *models.Categories) error
+	 List() ([]models.Categories, error)
+	 GetByID(id uint) (*models.Categories,error)
+	 GetWithPlans(id uint) (*models.Categories, error)
+	 Update(category *models.Categories) error
 	 Delete(id uint) error
 }
 
@@ -30,7 +30,7 @@ func NewCategoryRepo(db *gorm.DB, log *slog.Logger) CategoryRepo{
 }
 
 
-func (c *categoryRepo) Create(category *models.Category) error {
+func (c *categoryRepo) Create(category *models.Categories) error {
 	 if category == nil {
 		c.log.Error("error in Create function category_repository.go")
 		return  errors.New("error create category in db")
@@ -40,8 +40,8 @@ func (c *categoryRepo) Create(category *models.Category) error {
 }
 
 
-func (c *categoryRepo) List() ([]models.Category, error){
-	var list []models.Category
+func (c *categoryRepo) List() ([]models.Categories, error){
+	var list []models.Categories
 	if err:= c.db.Find(&list).Error; err != nil {
 		c.log.Error("error in List function category_repository.go")
 		return nil, err
@@ -51,8 +51,8 @@ func (c *categoryRepo) List() ([]models.Category, error){
 }
 
 
-func (c *categoryRepo) GetByID(id uint) (*models.Category,error) {
-	var category models.Category
+func (c *categoryRepo) GetByID(id uint) (*models.Categories,error) {
+	var category models.Categories
 	if err := c.db.First(&category,id).Error; err != nil {
 		c.log.Error("error in GetByID function category_repository.go")
 		return nil, err
@@ -62,8 +62,8 @@ func (c *categoryRepo) GetByID(id uint) (*models.Category,error) {
 }
 
 
-func (c *categoryRepo) GetWithPlans(id uint) (*models.Category, error) {
-    var category models.Category
+func (c *categoryRepo) GetWithPlans(id uint) (*models.Categories, error) {
+    var category models.Categories
 
     err := c.db.Preload("ExercisePlans.Exercises").Preload("MealPlans.Meals").First(&category, id).Error
 
@@ -76,7 +76,7 @@ func (c *categoryRepo) GetWithPlans(id uint) (*models.Category, error) {
 }
 
 
-func (c *categoryRepo) Update(category *models.Category) error {
+func (c *categoryRepo) Update(category *models.Categories) error {
 	if category == nil {
 		c.log.Error("error in Update function category_repository.go")
 		return errors.New("error update in db") 
@@ -87,7 +87,7 @@ func (c *categoryRepo) Update(category *models.Category) error {
 
 
 func (c *categoryRepo) Delete(id uint) error {
-	if err := c.db.Delete(&models.Category{}, id).Error; err != nil {
+	if err := c.db.Delete(&models.Categories{}, id).Error; err != nil {
 		c.log.Error("error in Delete function category_repository.go")
 		return errors.New("error delete in db") 
 	}

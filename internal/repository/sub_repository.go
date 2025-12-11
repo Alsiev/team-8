@@ -29,7 +29,7 @@ func NewSubscriptionRepo(db *gorm.DB, log *slog.Logger) SubscriptionRepo {
 }
 
 func (r *subscriptionRepo) Create(req *models.Subscription) error {
-	if req != nil {
+	if req == nil {
 		r.log.Error("error create function in sub_repository.go")
 		return errors.New("error create sub in db")
 	}

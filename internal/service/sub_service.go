@@ -35,7 +35,7 @@ func (s *subscriptionService) CreateSub(req *models.CreateSubscriptionRequest) (
 		return nil, err
 	}
 
-	if _, err := s.category.GetCategoryByID(req.CategoryID); err != nil {
+	if _, err := s.category.GetCategoryByID(req.CategoriesID); err != nil {
 		s.log.Error("error found category id")
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (s *subscriptionService) CreateSub(req *models.CreateSubscriptionRequest) (
 		Name:          req.Name,
 		Description:   req.Description,
 		Price:         req.Price,
-		CategoryID: req.CategoryID,
+		CategoriesID: req.CategoriesID,
 		DurationDays: req.DurationDays,
 	}
 

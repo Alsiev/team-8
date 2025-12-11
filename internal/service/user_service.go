@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"healthy_body/internal/models"
 	"healthy_body/internal/repository"
@@ -14,7 +15,9 @@ type UserService interface {
 	CreateUser(req models.CreateUserRequest) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(id uint) (*models.User, error)
-	GetUserPlan(userID uint) (*models.Category, error)
+	GetUserPlan(userID uint) (*models.Categories, error)
+	GetUserCategory(userID uint) (*models.User, error)
+	GetUserSub(userID uint) (*models.User, error)
 	UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error)
 	Delete(id uint) error
 
@@ -57,7 +60,7 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 		Name:       req.Name,
 		Balance:    0,
 		Email:      req.Email,
-		CategoryID: 2,
+		CategoriesID: 2,
 	}
 
 	if err := s.userRepo.Create(newUser); err != nil {
@@ -120,18 +123,40 @@ func (s *userService) GetUserByID(id uint) (*models.User, error) {
 	return result, nil
 }
 
-func (s *userService) GetUserPlan(userID uint) (*models.Category, error) {
+func (s *userService) GetUserPlan(userID uint) (*models.Categories, error) {
 
 	user, err := s.userRepo.GetUserByID(userID)
 	if err != nil {
+		s.log.Error("invalid user id")
 		return nil, err
 	}
-	category, err := s.categoryRepo.GetWithPlans(user.CategoryID)
+	category, err := s.categoryRepo.GetWithPlans(user.CategoriesID)
 	if err != nil {
+		s.log.Error("invalid user category id")
 		return nil, err
 	}
 
 	return category, nil
+}
+
+func (s *userService) GetUserCategory(userID uint) (*models.User, error) {
+	user, err := s.userRepo.GeUserCategory(userID)
+	if err != nil {
+		s.log.Error("error user not found")
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *userService) GetUserSub(userID uint) (*models.User, error) {
+	user, err := s.userRepo.GetUserSub(userID)
+	if err != nil {
+		s.log.Error("error user not found")
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error) {
@@ -223,20 +248,29 @@ func (s *userService) PaymentToAnother(userID uint, categoryID uint, secondUserI
 		if err := tx.First(&user, userID).Error; err != nil {
 			s.log.Error("Ошибка при поиске пользователя",
 				"error", err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("пользователь не найден")
+			}
 			return fmt.Errorf("ошибка при поиске пользователя %w", err)
 		}
 
 		if err := tx.First(&userSec, secondUserID).Error; err != nil {
 			s.log.Error("Ошибка при поиске второго пользователя",
 				"error", err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("второй пользователь не найден")
+			}
 			return fmt.Errorf("ошибка при поиске второго пользователя %w", err)
 		}
 
-		var category models.Category
+		var category models.Categories
 
 		if err := tx.First(&category, categoryID).Error; err != nil {
 			s.log.Error("Ошибка при поиске категории",
 				"error", err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("категория не найдена")
+			}
 			return fmt.Errorf("ошибка при поиске категории %w", err)
 		}
 
@@ -246,11 +280,11 @@ func (s *userService) PaymentToAnother(userID uint, categoryID uint, secondUserI
 		}
 
 		user.Balance -= category.Price
-		userSec.CategoryID = categoryID
+		userSec.CategoriesID = categoryID
 
 		userPlan := &models.UserPlan{
 			UserID:     secondUserID,
-			CategoryID: categoryID,
+			CategoriesID: categoryID,
 		}
 
 		if err := tx.Create(&userPlan).Error; err != nil {
@@ -289,14 +323,20 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		if err := tx.First(&user, userID).Error; err != nil {
 			s.log.Error("Ошибка при поиске пользователя",
 				"error", err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("пользователь не найден")
+			}
 			return fmt.Errorf("ошибка при поиске пользователя %w", err)
 		}
 
-		var category models.Category
+		var category models.Categories
 
 		if err := tx.First(&category, categoryID).Error; err != nil {
 			s.log.Error("Ошибка при поиске категории",
 				"error", err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("категория не найдена")
+			}
 			return fmt.Errorf("ошибка при поиске категории %w", err)
 		}
 
@@ -306,11 +346,11 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		}
 
 		user.Balance -= category.Price
-		user.CategoryID = categoryID
+		user.CategoriesID = categoryID
 
 		userPlan := &models.UserPlan{
-			UserID:     userID,
-			CategoryID: categoryID,
+			UserID:     user.ID,
+			CategoriesID: user.CategoriesID,
 		}
 
 		if err := tx.Create(&userPlan).Error; err != nil {
@@ -326,7 +366,7 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		}
 
 		s.log.Info("Оплата прошла успешно")
-
+    
 		if err := s.notifier.SendPaymentSuccess(&user, &category); err != nil {
 			s.log.Error("не удалось отправить уведомление", "err", err)
 		}
@@ -340,6 +380,9 @@ func (s *userService) SubPayment(userID, subID uint) error {
 
 		var user models.User
 		if err := tx.First(&user, userID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("пользователь не найден")
+			}
 			return fmt.Errorf("user not found: %w", err)
 		}
 

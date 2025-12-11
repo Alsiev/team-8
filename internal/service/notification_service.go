@@ -5,5 +5,5 @@ import (
 )
 
 type NotificationService interface {
-	SendPaymentSuccess(user *models.User, category *models.Category) error
+	SendPaymentSuccess(user *models.User, category *models.Categories) error
 }

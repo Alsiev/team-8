@@ -4,14 +4,14 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Name       string    `json:"name"`
-	Balance    int       `json:"balance"`
-	Email      string    `json:"email"`
-	CategoryID uint      `json:"category_id"`
-	Category   *Category `json:"-" gorm:"foreignKey:CategoryID"`
+	Name         string      `json:"name"`
+	Balance      int         `json:"balance"`
+	Email        string      `json:"email"`
+	CategoriesID uint        `json:"categories_id"`
+	Categories   *Categories `json:"-" gorm:"foreignKey:CategoriesID"`
 
-	UserSubscriptions []UserSubscription `json:"-"`
-	UserPlans         []UserPlan         `json:"-"`
+	UserSubscriptions []UserSubscription `json:"userSubscriptions"`
+	UserPlans         []UserPlan         `json:"userPlans"`
 }
 
 type CreateUserRequest struct {

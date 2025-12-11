@@ -19,18 +19,20 @@ func main() {
 	server := gin.Default()
 
 	if err := db.AutoMigrate(
+		&models.Categories{},
+		&models.Subscription{},
 		&models.User{},
-		&models.Category{},
+		&models.UserPlan{},
+		&models.UserSubscription{},
 		&models.ExercisePlan{},
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
-		&models.Subscription{},
-		&models.UserPlan{},
-		&models.UserSubscription{}); err != nil {
+		); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
+
 	categoryRepo := repository.NewCategoryRepo(db, logger)
 	planRepo := repository.NewExercisePlanRepo(db, logger)
 
