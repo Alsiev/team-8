@@ -28,7 +28,7 @@ func main() {
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
-		); err != nil {
+	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
@@ -47,9 +47,9 @@ func main() {
 	userRepo := repository.NewUserRepository(db, logger)
 	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
 	notificationService := service.NewEmailNotificationService(
-		"vvvvvisssss@mail.ru",
-		"0DgAdKr1pfRpx0GlwNYg",
-		"smtp.mail.ru",
+		os.Getenv("EMAIL_USER"),
+		os.Getenv("EMAIL_PASS"),
+		os.Getenv("EMAIL_HOST"),
 		587,
 		logger)
 	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo, notificationService)
