@@ -10,6 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Для Swagger лучше использовать отдельную структуру ответа
+type CategoryResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
 type CategoryHandler struct {
 	category service.CategoryServices
 	log      *slog.Logger
@@ -23,118 +29,160 @@ func NewCategoryHandler(category service.CategoryServices, log *slog.Logger) *Ca
 }
 
 func (h *CategoryHandler) RegisterRoutes(r *gin.Engine) {
-	categoryGroup := r.Group("/category")
+	group := r.Group("/category")
 	{
-		categoryGroup.POST("/", h.CreateCategory)
-		categoryGroup.GET("/:id", h.GetByID)
-		categoryGroup.GET("/", h.GetList)
-		categoryGroup.PATCH("/:id", h.UpdateCategory)
-		categoryGroup.DELETE("/:id", h.DeleteCategory)
-
+		group.POST("/", h.CreateCategory)
+		group.GET("/", h.GetList)
+		group.GET("/:id", h.GetByID)
+		group.PATCH("/:id", h.UpdateCategory)
+		group.DELETE("/:id", h.DeleteCategory)
 	}
 }
 
+// CreateCategory godoc
+// @Summary Создать категорию
+// @Description Создает новую категорию
+// @Tags Categories
+// @Accept json
+// @Produce json
+// @Param category body models.CreateCategoryRequest true "Данные категории"
+// @Success 201 {object} CategoryResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /category/ [post]
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
-	var inputCategory models.CreateCategoryRequest
-
-	if err := c.ShouldBindJSON(&inputCategory); err != nil {
-		h.log.Warn("error invalid input type information")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var input models.CreateCategoryRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.log.Warn("invalid input", "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	category, err := h.category.CreateCategory(inputCategory)
+	cat, err := h.category.CreateCategory(input)
 	if err != nil {
-		h.log.Error("error in db")
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		h.log.Error("failed to create category", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	h.log.Info("succes create category",
-		"category", category,
-	)
-	c.IndentedJSON(http.StatusCreated, category)
+	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
+	c.JSON(http.StatusCreated, resp)
 }
 
+// GetByID godoc
+// @Summary Получить категорию по ID
+// @Description Возвращает категорию по ID
+// @Tags Categories
+// @Produce json
+// @Param id path int true "ID категории"
+// @Success 200 {object} CategoryResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /category/{id} [get]
 func (h *CategoryHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		h.log.Warn("error parse id")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		h.log.Warn("invalid id", "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	category, err := h.category.GetCategoryByID(uint(id))
+	cat, err := h.category.GetCategoryByID(uint(id))
 	if err != nil {
-		h.log.Error("error found category in db")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		h.log.Error("category not found", "id", id)
+		c.JSON(http.StatusNotFound, gin.H{"error": "category not found"})
 		return
 	}
 
-	h.log.Info("succes category found",
-		"category_id", category.ID,
-	)
-	c.IndentedJSON(http.StatusOK, category)
+	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
+	c.JSON(http.StatusOK, resp)
 }
 
+// GetList godoc
+// @Summary Получить список категорий
+// @Description Возвращает все категории
+// @Tags Categories
+// @Produce json
+// @Success 200 {array} CategoryResponse
+// @Failure 500 {object} map[string]string
+// @Router /category/ [get]
 func (h *CategoryHandler) GetList(c *gin.Context) {
 	list, err := h.category.GetCategoryList()
 	if err != nil {
-		h.log.Error("error found category list in db")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid list"})
+		h.log.Error("failed to get category list", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get categories"})
 		return
 	}
 
-	h.log.Info("list found succes")
-	c.IndentedJSON(http.StatusOK, list)
+	resp := make([]CategoryResponse, len(list))
+	for i, cat := range list {
+		resp[i] = CategoryResponse{ID: cat.ID, Name: cat.Name}
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
+// UpdateCategory godoc
+// @Summary Обновить категорию
+// @Description Обновляет категорию по ID
+// @Tags Categories
+// @Accept json
+// @Produce json
+// @Param id path int true "ID категории"
+// @Param category body models.UpdateCategoryRequest true "Данные обновления"
+// @Success 200 {object} CategoryResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /category/{id} [patch]
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		h.log.Warn("error parse id")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		h.log.Warn("invalid id", "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	var updateCategory models.UpdateCategoryRequest
-
-	if err := c.ShouldBindJSON(&updateCategory); err != nil {
-		h.log.Warn("error type update values")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+	var input models.UpdateCategoryRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.log.Warn("invalid update data", "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	category, err := h.category.UpdateCategory(uint(id), updateCategory)
+	cat, err := h.category.UpdateCategory(uint(id), input)
 	if err != nil {
-		h.log.Error("error update category in db")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id or update"})
+		h.log.Error("failed to update category", "error", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "category not found or update failed"})
 		return
 	}
 
-	h.log.Info("succes category updated",
-		"category_id", category.ID,
-	)
-	c.IndentedJSON(http.StatusOK, category)
+	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
+	c.JSON(http.StatusOK, resp)
 }
 
+// DeleteCategory godoc
+// @Summary Удалить категорию
+// @Description Удаляет категорию по ID
+// @Tags Categories
+// @Produce json
+// @Param id path int true "ID категории"
+// @Success 200 {object} map[string]bool
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /category/{id} [delete]
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		h.log.Warn("error parse id")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		h.log.Warn("invalid id", "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	if err := h.category.DeleteCategory(uint(id)); err != nil {
-		h.log.Error("error delete category in db")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id or update"})
+		h.log.Error("failed to delete category", "error", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "category not found or delete failed"})
 		return
 	}
 
-	h.log.Info("succes category deleted")
-	c.IndentedJSON(http.StatusOK, gin.H{"deleted": true})
+	c.JSON(http.StatusOK, gin.H{"deleted": true})
 }

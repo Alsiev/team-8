@@ -11,7 +11,11 @@ import (
 	"log/slog"
 	"os"
 
+	_ "healthy_body/internal/docs" // <- путь до сгенерированной swagger документации
+
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -74,6 +78,8 @@ func main() {
 		reviewsService,
 	)
 
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	
 	if err := server.Run(); err != nil {
 		log.Fatalf("не удалось запустить HTTP-сервер: %v", err)
 	}
