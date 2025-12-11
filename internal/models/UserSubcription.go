@@ -14,6 +14,6 @@ type UserSubscription struct {
 	EndDate        time.Time `json:"end_date"`
 	IsActive       bool      `json:"is_active"`
 
-	User         *User         `json:"-"`
-	Subscription *Subscription `json:"-"`
+	User         *User         `json:"-" gorm:"foreignKey:UserID"`
+	Subscription *Subscription `json:"-" gorm:"foreignKey:SubscriptionID"`
 }

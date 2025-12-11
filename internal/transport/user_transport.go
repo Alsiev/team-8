@@ -214,13 +214,41 @@ func (h *UserHandler) Payment(c *gin.Context) {
 	})
 }
 
+func (h *UserHandler) GetUserWithiPlan(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+
+	if err != nil {
+		h.log.Warn("Некорректный ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "некорректный ID",
+		})
+		return
+	}
+
+	user , err := h.user.GetUserPlan(uint(id))
+	if err != nil {
+		h.log.Error("Ошибка при удалении пользователя",
+			"error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
 func (h *UserHandler) UserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/", h.Create)
+		userGroup.POST("/buycategory/:userID/:categoryID", h.Payment)
 		userGroup.GET("/", h.GetAllUser)
 		userGroup.GET("/:id", h.GetUserByID)
-		userGroup.PUT("/:id", h.Update)
+		userGroup.GET("/plan/:id", h.GetUserWithiPlan)
+		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}
 }

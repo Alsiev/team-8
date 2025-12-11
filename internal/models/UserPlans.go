@@ -7,6 +7,6 @@ type UserPlan struct {
 	UserID uint `json:"user_id"`
 	CategoryID uint `json:"category_id"`
 
-	User *User `json:"-" gorm:"foreignKey:UserID"`
-	Category *Category `json:"-" gorm:"foreignKey:UserID"`
+	User     *User     `json:"-" gorm:"foreignKey:UserID"`
+	Category *Category `json:"-" gorm:"foreignKey:CategoryID"`
 }

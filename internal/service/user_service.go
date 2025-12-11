@@ -14,6 +14,7 @@ type UserService interface {
 	CreateUser(req models.CreateUserRequest) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(id uint) (*models.User, error)
+	GetUserPlan(userID uint) (*models.Category, error)
 	UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error)
 	Delete(id uint) error
 
@@ -26,14 +27,16 @@ type userService struct {
 	log      *slog.Logger
 	db       *gorm.DB
 	sub      SubscriptionService
+	categoryRepo repository.CategoryRepo
 }
 
-func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB, sub SubscriptionService) UserService {
+func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB, sub SubscriptionService, categoryRepo repository.CategoryRepo) UserService {
 	return &userService{
 		userRepo: userRepo,
 		log:      log,
 		db:       db,
 		sub:      sub,
+		categoryRepo: categoryRepo,
 	}
 }
 
@@ -50,7 +53,7 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 	newUser := &models.User{
 		Name:       req.Name,
 		Balance:    0,
-		CategoryID: 0,
+		CategoryID: 2,
 	}
 
 	if err := s.userRepo.Create(newUser); err != nil {
@@ -110,6 +113,21 @@ func (s *userService) GetUserByID(id uint) (*models.User, error) {
 
 	return result, nil
 }
+
+func (s *userService) GetUserPlan(userID uint) (*models.Category, error){
+ 
+    user, err := s.userRepo.GetUserByID(userID)
+    if err != nil {
+        return nil, err
+    }
+    category, err := s.categoryRepo.GetWithPlans(user.CategoryID)
+    if err != nil {
+        return nil, err
+    }
+
+    return category, nil
+}
+
 
 func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error) {
 
@@ -206,6 +224,17 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		user.Balance -= category.Price
 		user.CategoryID = categoryID
 
+		userPlan := &models.UserPlan{
+			UserID: userID,
+			CategoryID: categoryID,
+		}
+
+		if err := tx.Create(&userPlan).Error; err != nil {
+			s.log.Error("Ошибка при записи покупки пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при записи покупки пользователя %w", err)
+		}
+
 		if err := tx.Save(&user).Error; err != nil {
 			s.log.Error("Ошибка при сохранении пользователя",
 				"error", err.Error())
@@ -250,7 +279,7 @@ func (s *userService) SubPayment(userID, subID uint) error {
 			IsActive:       true,
 		}
 
-		if err := tx.Create(userSub).Error; err != nil {
+		if err := tx.Create(&userSub).Error; err != nil {
 			return fmt.Errorf("cannot create user subscription: %w", err)
 		}
 

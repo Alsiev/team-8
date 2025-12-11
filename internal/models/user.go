@@ -8,7 +8,7 @@ type User struct {
 	Balance int `json:"balance"`
 
 	CategoryID uint      `json:"category_id"`
-	Category   *Category `json:"-"`
+	Category   *Category `json:"-" gorm:"foreignKey:CategoryID"`
 
 	UserSubscriptions []UserSubscription `json:"-"`
 	UserPlans []UserPlan `json:"-"`

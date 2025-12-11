@@ -24,7 +24,10 @@ func main() {
 		&models.ExercisePlan{},
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
-		&models.MealPlanItem{}); err != nil {
+		&models.MealPlanItem{},
+		&models.Subscription{},
+		&models.UserPlan{},
+		&models.UserSubscription{}); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
@@ -41,7 +44,7 @@ func main() {
 	mealPlanItemService := service.NewMealPlanItemsService(mealPlanItemRepo, logger)
 	userRepo := repository.NewUserRepository(db, logger)
 	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
-	userService := service.NewUserService(userRepo, logger, db, subService)
+	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo)
 
 
 
