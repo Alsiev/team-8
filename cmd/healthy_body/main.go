@@ -49,7 +49,12 @@ func main() {
 	mealPlanItemService := service.NewMealPlanItemsService(mealPlanItemRepo, logger)
 	userRepo := repository.NewUserRepository(db, logger)
 	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
-	notificationService := service.NewNotificationService(logger)
+	notificationService := service.NewEmailNotificationService(
+		"vvvvvisssss@mail.ru",
+		"0DgAdKr1pfRpx0GlwNYg",
+		"smtp.mail.ru",
+		587,
+		logger)
 	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo, notificationService)
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {

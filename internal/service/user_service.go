@@ -59,6 +59,7 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 	newUser := &models.User{
 		Name:       req.Name,
 		Balance:    0,
+		Email:      req.Email,
 		CategoryID: 2,
 	}
 
@@ -74,6 +75,7 @@ func (s *userService) CreateUser(req models.CreateUserRequest) (*models.User, er
 		"id", newUser.ID,
 		"имя", req.Name,
 		"баланс", 0,
+		"почта", req.Email,
 		"категория", 0)
 
 	return newUser, nil
@@ -115,6 +117,7 @@ func (s *userService) GetUserByID(id uint) (*models.User, error) {
 		"id", result.ID,
 		"имя", result.Name,
 		"баланс", result.Balance,
+		"почта", result.Email,
 	)
 
 	return result, nil
@@ -183,6 +186,15 @@ func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models
 		}
 	}
 
+	if req.Email != nil {
+		if len(*req.Email) < 2 {
+			s.log.Warn("Некорректный email",
+				"id", id,
+				"name", *req.Email)
+			return nil, fmt.Errorf("email должен содержать минимум 3 символа и '@'")
+		}
+	}
+
 	user, err := s.GetUserByID(id)
 
 	if err != nil {
@@ -197,6 +209,9 @@ func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models
 	if req.Balance != nil {
 		user.Balance = *req.Balance
 	}
+	if req.Email != nil {
+		user.Email = *req.Email
+	}
 
 	if err := s.userRepo.Update(user); err != nil {
 		s.log.Error("Ошибка при обновлении пользователя",
@@ -208,6 +223,7 @@ func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models
 		"id", id,
 		"имя", req.Name,
 		"баланс", req.Balance,
+		"почта", req.Email,
 	)
 	return user, nil
 }
