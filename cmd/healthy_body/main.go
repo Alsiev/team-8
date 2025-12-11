@@ -28,6 +28,7 @@ func main() {
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
+		&models.Reviews{},
 	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
@@ -39,6 +40,8 @@ func main() {
 	mealPlanRepo := repository.NewMealPlanRepository(db, logger)
 	mealPlanItemRepo := repository.NewMealPlanItemRepository(db, logger)
 	subRepo := repository.NewSubscriptionRepo(db, logger)
+
+	reviewsRepo := repository.NewReviewsRepository(db, logger)
 
 	categoryServices := service.NewCategoryServices(categoryRepo, logger)
 	planServices := service.NewExercisePlanServices(planRepo, logger, categoryServices)
@@ -53,6 +56,7 @@ func main() {
 		587,
 		logger)
 	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo, notificationService)
+	reviewsService := service.NewReviewsService(reviewsRepo, logger)
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {
 		fmt.Println("tables:", tableList)
@@ -67,6 +71,7 @@ func main() {
 		mealPlanItemService,
 		userService,
 		subService,
+		reviewsService,
 	)
 
 	if err := server.Run(); err != nil {
