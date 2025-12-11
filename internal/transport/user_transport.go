@@ -175,6 +175,55 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 }
 
+func (h *UserHandler) PaymentToAnother(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	categoryIDstr := c.Param("categoryID")
+	secondUserIDstr := c.Param("secondUserID")
+
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+	secondUserID, err := strconv.ParseUint(secondUserIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID второго пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	categoryID, err := strconv.ParseUint(categoryIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Error("Ошибка при получении ID категории")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	if err := h.user.PaymentToAnother(uint(userID), uint(categoryID), uint(secondUserID)); err != nil {
+		h.log.Error("Ошибка при оплате",
+			"error", err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	h.log.Info("Оплата прошла успешно")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "оплата прошла успешно",
+	})
+}
+
 func (h *UserHandler) Payment(c *gin.Context) {
 	userIDstr := c.Param("userID")
 	categoryIDstr := c.Param("categoryID")
@@ -208,13 +257,13 @@ func (h *UserHandler) Payment(c *gin.Context) {
 		return
 	}
 
-	h.log.Info("Оплата проошла успешно")
+	h.log.Info("Оплата прошла успешно")
 	c.JSON(http.StatusOK, gin.H{
-		"message": "оплата прощла успешно",
+		"message": "оплата прошла успешно",
 	})
 }
 
-func (h *UserHandler) GetUserWithiPlan(c *gin.Context) {
+func (h *UserHandler) GetUserWithPlan(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -227,7 +276,7 @@ func (h *UserHandler) GetUserWithiPlan(c *gin.Context) {
 		return
 	}
 
-	user , err := h.user.GetUserPlan(uint(id))
+	user, err := h.user.GetUserPlan(uint(id))
 	if err != nil {
 		h.log.Error("Ошибка при удалении пользователя",
 			"error", err.Error())
@@ -244,10 +293,11 @@ func (h *UserHandler) UserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/", h.Create)
-		userGroup.POST("/buycategory/:userID/:categoryID", h.Payment)
+		userGroup.POST("/payment/:userID/:categoryID", h.Payment)
+		userGroup.POST("/present/:userID/:categoryID/:secondUserID", h.PaymentToAnother)
 		userGroup.GET("/", h.GetAllUser)
 		userGroup.GET("/:id", h.GetUserByID)
-		userGroup.GET("/plan/:id", h.GetUserWithiPlan)
+		userGroup.GET("/plan/:id", h.GetUserWithPlan)
 		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}

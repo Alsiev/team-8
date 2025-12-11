@@ -44,9 +44,8 @@ func main() {
 	mealPlanItemService := service.NewMealPlanItemsService(mealPlanItemRepo, logger)
 	userRepo := repository.NewUserRepository(db, logger)
 	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
-	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo)
-
-
+	notificationService := service.NewNotificationService(logger)
+	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo, notificationService)
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {
 		fmt.Println("tables:", tableList)

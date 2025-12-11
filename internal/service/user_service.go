@@ -20,23 +20,26 @@ type UserService interface {
 
 	Payment(userID uint, categoryID uint) error
 	SubPayment(userID, subID uint) error
+	PaymentToAnother(userID uint, categoryID uint, secondUserID uint) error
 }
 
 type userService struct {
-	userRepo repository.UserRepository
-	log      *slog.Logger
-	db       *gorm.DB
-	sub      SubscriptionService
+	userRepo     repository.UserRepository
+	log          *slog.Logger
+	db           *gorm.DB
+	sub          SubscriptionService
 	categoryRepo repository.CategoryRepo
+	notifier     NotificationService
 }
 
-func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB, sub SubscriptionService, categoryRepo repository.CategoryRepo) UserService {
+func NewUserService(userRepo repository.UserRepository, log *slog.Logger, db *gorm.DB, sub SubscriptionService, categoryRepo repository.CategoryRepo, notifier NotificationService) UserService {
 	return &userService{
-		userRepo: userRepo,
-		log:      log,
-		db:       db,
-		sub:      sub,
+		userRepo:     userRepo,
+		log:          log,
+		db:           db,
+		sub:          sub,
 		categoryRepo: categoryRepo,
+		notifier:     notifier,
 	}
 }
 
@@ -114,20 +117,19 @@ func (s *userService) GetUserByID(id uint) (*models.User, error) {
 	return result, nil
 }
 
-func (s *userService) GetUserPlan(userID uint) (*models.Category, error){
- 
-    user, err := s.userRepo.GetUserByID(userID)
-    if err != nil {
-        return nil, err
-    }
-    category, err := s.categoryRepo.GetWithPlans(user.CategoryID)
-    if err != nil {
-        return nil, err
-    }
+func (s *userService) GetUserPlan(userID uint) (*models.Category, error) {
 
-    return category, nil
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	category, err := s.categoryRepo.GetWithPlans(user.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return category, nil
 }
-
 
 func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error) {
 
@@ -197,6 +199,72 @@ func (s *userService) Delete(id uint) error {
 	return nil
 }
 
+func (s *userService) PaymentToAnother(userID uint, categoryID uint, secondUserID uint) error {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		var user models.User
+		var userSec models.User
+
+		if err := tx.First(&user, userID).Error; err != nil {
+			s.log.Error("Ошибка при поиске пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при поиске пользователя %w", err)
+		}
+
+		if err := tx.First(&userSec, secondUserID).Error; err != nil {
+			s.log.Error("Ошибка при поиске второго пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при поиске второго пользователя %w", err)
+		}
+
+		var category models.Category
+
+		if err := tx.First(&category, categoryID).Error; err != nil {
+			s.log.Error("Ошибка при поиске категории",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при поиске категории %w", err)
+		}
+
+		if user.Balance < category.Price {
+			s.log.Warn("Недостаточно средств на счету")
+			return fmt.Errorf("недостаточно средств на счету")
+		}
+
+		user.Balance -= category.Price
+		userSec.CategoryID = categoryID
+
+		userPlan := &models.UserPlan{
+			UserID:     secondUserID,
+			CategoryID: categoryID,
+		}
+
+		if err := tx.Create(&userPlan).Error; err != nil {
+			s.log.Error("Ошибка при записи покупки пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при записи покупки пользователя %w", err)
+		}
+
+		if err := tx.Save(&user).Error; err != nil {
+			s.log.Error("Ошибка при сохранении пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при сохранении пользователя %w", err)
+		}
+		if err := tx.Save(&userSec).Error; err != nil {
+			s.log.Error("Ошибка при сохранении пользователя",
+				"error", err.Error())
+			return fmt.Errorf("ошибка при сохранении пользователя %w", err)
+		}
+
+		s.log.Info("Оплата прошла успешно")
+
+		if err := s.notifier.SendPaymentSuccess(&user, &category); err != nil {
+			s.log.Error("не удалось отправить уведомление", "err", err)
+		}
+
+		return nil
+	})
+	return err
+}
+
 func (s *userService) Payment(userID uint, categoryID uint) error {
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 
@@ -225,7 +293,7 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		user.CategoryID = categoryID
 
 		userPlan := &models.UserPlan{
-			UserID: userID,
+			UserID:     userID,
 			CategoryID: categoryID,
 		}
 
@@ -242,6 +310,10 @@ func (s *userService) Payment(userID uint, categoryID uint) error {
 		}
 
 		s.log.Info("Оплата прошла успешно")
+
+		if err := s.notifier.SendPaymentSuccess(&user, &category); err != nil {
+			s.log.Error("не удалось отправить уведомление", "err", err)
+		}
 
 		return nil
 	})
