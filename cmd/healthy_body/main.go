@@ -32,6 +32,7 @@ func main() {
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
+		&models.Reviews{},
 	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
@@ -44,6 +45,8 @@ func main() {
 	mealPlanItemRepo := repository.NewMealPlanItemRepository(db, logger)
 	subRepo := repository.NewSubscriptionRepo(db, logger)
 
+	reviewsRepo := repository.NewReviewsRepository(db, logger)
+
 	categoryServices := service.NewCategoryServices(categoryRepo, logger)
 	planServices := service.NewExercisePlanServices(planRepo, logger, categoryServices)
 	mealPlanService := service.NewMealPlanService(mealPlanRepo, logger, categoryServices)
@@ -51,12 +54,13 @@ func main() {
 	userRepo := repository.NewUserRepository(db, logger)
 	subService := service.NewSubscriptionService(subRepo, logger, categoryServices)
 	notificationService := service.NewEmailNotificationService(
-		"vvvvvisssss@mail.ru",
-		"0DgAdKr1pfRpx0GlwNYg",
-		"smtp.mail.ru",
+		os.Getenv("EMAIL_USER"),
+		os.Getenv("EMAIL_PASS"),
+		os.Getenv("EMAIL_HOST"),
 		587,
 		logger)
 	userService := service.NewUserService(userRepo, logger, db, subService, categoryRepo, notificationService)
+	reviewsService := service.NewReviewsService(reviewsRepo, logger)
 
 	if tableList, err := db.Migrator().GetTables(); err == nil {
 		fmt.Println("tables:", tableList)
@@ -71,6 +75,7 @@ func main() {
 		mealPlanItemService,
 		userService,
 		subService,
+		reviewsService,
 	)
 
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
