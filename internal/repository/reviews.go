@@ -10,7 +10,6 @@ import (
 
 type ReviewsRepository interface {
 	CreateReviews(req *models.Reviews) error
-	GetAllReviews() ([]models.Reviews, error)
 	GetReviewsByID(id uint) (*models.Reviews, error)
 	UpdateReviews(req *models.Reviews) error
 	Delete(id uint) error
