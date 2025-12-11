@@ -1,0 +1,1437 @@
+definitions:
+  models.CreateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.CreateExercesicePlanRequest:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      duration_weeks:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.CreateExercisePlanItemRequest:
+    properties:
+      day_of_week:
+        type: string
+      duration_minutes:
+        type: string
+      equipment_needed:
+        type: string
+      exercise_plan_id:
+        type: integer
+      name:
+        type: string
+      reps:
+        type: integer
+      sets:
+        type: integer
+    type: object
+  models.CreateMealPlanItemRequest:
+    properties:
+      calories:
+        type: number
+      carbs:
+        type: number
+      description:
+        type: string
+      meal_plan_id:
+        type: integer
+      name:
+        type: string
+      protein:
+        type: number
+    type: object
+  models.CreateMealPlanRequest:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      total_days:
+        type: integer
+    type: object
+  models.CreateSubscriptionRequest:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      duration_days:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  models.ExercisePlanItem:
+    properties:
+      day_of_week:
+        type: string
+      duration_minutes:
+        type: string
+      equipment_needed:
+        type: string
+      exercise_plan_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      reps:
+        type: integer
+      sets:
+        type: integer
+    type: object
+  models.UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.UpdateExercesicePlanRequest:
+    properties:
+      description:
+        type: string
+      duration_weeks:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.UpdateExercisePlanItemRequest:
+    properties:
+      day_of_week:
+        type: string
+      duration_minutes:
+        type: string
+      equipment_needed:
+        type: string
+      exercise_plan_id:
+        type: integer
+      name:
+        type: string
+      reps:
+        type: integer
+      sets:
+        type: integer
+    type: object
+  models.UpdateMealPlanItemRequest:
+    properties:
+      calories:
+        type: number
+      carbs:
+        type: number
+      description:
+        type: string
+      meal_plan_id:
+        type: integer
+      name:
+        type: string
+      protein:
+        type: number
+    type: object
+  models.UpdateMealPlanRequest:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      total_days:
+        type: integer
+    type: object
+  models.UpdateSubscriptionRequest:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      duration_days:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      balance:
+        type: integer
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  transport.BmiValues:
+    description: Входные данные для расчёта BMI
+    properties:
+      heigth:
+        type: number
+      weigth:
+        type: number
+    type: object
+  transport.CategoryResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  transport.ExercisePlanResponse:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      duration_weeks:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  transport.MealPlanItemResponse:
+    properties:
+      calories:
+        type: number
+      carbs:
+        type: number
+      description:
+        type: string
+      id:
+        type: integer
+      meal_plan_id:
+        type: integer
+      name:
+        type: string
+      protein:
+        type: number
+    type: object
+  transport.MealPlanResponse:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      total_days:
+        type: integer
+    type: object
+  transport.SubscriptionResponse:
+    properties:
+      categories_id:
+        type: integer
+      description:
+        type: string
+      duration_days:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /bmi/:
+    post:
+      consumes:
+      - application/json
+      description: Принимает вес (кг) и рост (см), возвращает категорию и BMI
+      parameters:
+      - description: Данные для BMI
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/transport.BmiValues'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный расчёт
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ввод
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Расчёт индекса массы тела (BMI)
+      tags:
+      - BMI
+  /category/:
+    get:
+      description: Возвращает все категории
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/transport.CategoryResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список категорий
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Создает новую категорию
+      parameters:
+      - description: Данные категории
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/transport.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать категорию
+      tags:
+      - Categories
+  /category/{id}:
+    delete:
+      description: Удаляет категорию по ID
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить категорию
+      tags:
+      - Categories
+    get:
+      description: Возвращает категорию по ID
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить категорию по ID
+      tags:
+      - Categories
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет категорию по ID
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные обновления
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить категорию
+      tags:
+      - Categories
+  /mealPlanItems/:
+    get:
+      description: Возвращает массив MealPlanItem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/transport.MealPlanItemResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список всех элементов плана питания
+      tags:
+      - MealPlanItems
+    post:
+      consumes:
+      - application/json
+      description: Создает новый MealPlanItem
+      parameters:
+      - description: Данные для создания
+        in: body
+        name: mealPlanItem
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMealPlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать элемент плана питания
+      tags:
+      - MealPlanItems
+  /mealPlanItems/{id}:
+    delete:
+      description: Удаляет MealPlanItem по ID
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить элемент плана питания
+      tags:
+      - mealPlanItems
+    get:
+      description: Возвращает MealPlanItem по ID
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить элемент плана питания по ID
+      tags:
+      - MealPlanItems
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет MealPlanItem по ID
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: mealPlanItem
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMealPlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить элемент плана питания
+      tags:
+      - MealPlanItems
+  /mealPlans/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/transport.MealPlanResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get All Meal Plans
+      tags:
+      - MealPlans
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Meal Plan Data
+        in: body
+        name: mealPlan
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMealPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create Meal Plan
+      tags:
+      - MealPlans
+  /mealPlans/{id}:
+    delete:
+      parameters:
+      - description: Meal Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete Meal Plan
+      tags:
+      - MealPlans
+    get:
+      parameters:
+      - description: Meal Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Meal Plan By ID
+      tags:
+      - MealPlans
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Meal Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update data
+        in: body
+        name: mealPlan
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMealPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.MealPlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Meal Plan
+      tags:
+      - MealPlans
+  /plan/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/transport.ExercisePlanResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список тренировочных планов
+      tags:
+      - ExercisePlan
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый тренировочный план
+      parameters:
+      - description: Данные тренировочного плана
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateExercesicePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.ExercisePlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создание тренировочного плана
+      tags:
+      - ExercisePlan
+  /plan/{id}:
+    delete:
+      parameters:
+      - description: ID плана
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить тренировочный план
+      tags:
+      - ExercisePlan
+    get:
+      parameters:
+      - description: ID плана
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.ExercisePlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить тренировочный план по ID
+      tags:
+      - ExercisePlan
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID плана
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновлённые данные
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateExercesicePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.ExercisePlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить тренировочный план
+      tags:
+      - ExercisePlan
+  /plan/planItem:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные элемента плана
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateExercisePlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExercisePlanItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать упражнение в плане
+      tags:
+      - ExercisePlanItem
+  /plan/planItem/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ExercisePlanItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список элементов плана
+      tags:
+      - ExercisePlanItem
+  /plan/planItem/{id}:
+    delete:
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить элемент плана
+      tags:
+      - ExercisePlanItem
+    get:
+      parameters:
+      - description: ID элемента плана
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExercisePlanItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить элемент плана по ID
+      tags:
+      - ExercisePlanItem
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновление
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateExercisePlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExercisePlanItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить элемент плана
+      tags:
+      - ExercisePlanItem
+  /sub/:
+    get:
+      description: Возвращает все подписки
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/transport.SubscriptionResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список подписок
+      tags:
+      - Subscription
+    post:
+      consumes:
+      - application/json
+      description: Создает новую подписку
+      parameters:
+      - description: Данные для создания подписки
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать подписку
+      tags:
+      - Subscription
+  /sub/{id}:
+    delete:
+      description: Удаляет подписку по ID
+      parameters:
+      - description: ID подписки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить подписку
+      tags:
+      - subscription
+    get:
+      description: Возвращает подписку по указанному ID
+      parameters:
+      - description: ID подписки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить подписку по ID
+      tags:
+      - Subscription
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет подписку по ID
+      parameters:
+      - description: ID подписки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления подписки
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transport.SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить подписку
+      tags:
+      - Subscription
+  /user/:
+    get:
+      description: Возвращает список всех пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить всех пользователей
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать пользователя
+      tags:
+      - User
+  /user/{id}:
+    delete:
+      description: Удаляет пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить пользователя
+      tags:
+      - User
+    get:
+      description: Возвращает пользователя по указанному ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить пользователя по ID
+      tags:
+      - User
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить пользователя
+      tags:
+      - User
+  /user/payment/{userID}/{categoryID}:
+    post:
+      description: Пользователь оплачивает выбранную категорию
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: ID категории
+        in: path
+        name: categoryID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Оплата пользователем
+      tags:
+      - User
+  /user/plan/{id}:
+    get:
+      description: Возвращает пользователя вместе с его планом питания
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить пользователя с планом питания
+      tags:
+      - User
+  /user/present/{userID}/{categoryID}/{secondUserID}:
+    post:
+      description: Пользователь оплачивает категорию другому пользователю
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: ID категории
+        in: path
+        name: categoryID
+        required: true
+        type: integer
+      - description: ID второго пользователя
+        in: path
+        name: secondUserID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Оплата другому пользователю
+      tags:
+      - User
+  /user/sub/{userID}/{subID}:
+    post:
+      description: Пользователь оплачивает выбранную подписку
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: ID подписки
+        in: path
+        name: subID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Оплата подписки пользователем
+      tags:
+      - User
+  /user/userplans/{id}:
+    get:
+      description: Возвращает пользователя с предзагруженными планами и категориями
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить категорию/планы пользователя
+      tags:
+      - User
+  /user/usersub/{userID}:
+    get:
+      description: Возвращает все подписки пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить подписки пользователя
+      tags:
+      - User
+swagger: "2.0"

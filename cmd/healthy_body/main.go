@@ -11,7 +11,11 @@ import (
 	"log/slog"
 	"os"
 
+	_ "healthy_body/internal/docs" // <- путь до сгенерированной swagger документации
+
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -28,7 +32,7 @@ func main() {
 		&models.ExercisePlanItem{},
 		&models.MealPlan{},
 		&models.MealPlanItem{},
-		); err != nil {
+	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
@@ -69,6 +73,8 @@ func main() {
 		subService,
 	)
 
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	
 	if err := server.Run(); err != nil {
 		log.Fatalf("не удалось запустить HTTP-сервер: %v", err)
 	}
