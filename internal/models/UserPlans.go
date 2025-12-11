@@ -3,10 +3,10 @@ package models
 import "gorm.io/gorm"
 
 type UserPlan struct {
-	gorm.Model
-	UserID     uint `json:"user_id"`
-	CategoryID uint `json:"category_id"`
+    gorm.Model
+    UserID     uint
+    CategoriesID uint
 
-	User     *User     `json:"-" gorm:"foreignKey:UserID"`
-	Category *Category `json:"-" gorm:"foreignKey:CategoryID"`
+    User     *User     		`gorm:"foreignKey:UserID"`
+    Categories *Categories 	`gorm:"foreignKey:CategoriesID"` // обязательно указать foreignKey
 }

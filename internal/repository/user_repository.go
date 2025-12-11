@@ -85,12 +85,19 @@ func (r *gormUserRepository) GetUserByID(id uint) (*models.User, error) {
 
 func (r *gormUserRepository) GeUserCategory(id uint) (*models.User, error) {
 	var user models.User
-	if err := r.db.Preload("UserPlans.Category").First(&user, id).Error; err != nil {
-		r.log.Error("Ошибка при получении пользователя по ID",
-			"id", id,
-			"error", err.Error())
-		return nil, err
-	}
+if err := r.db.
+    Preload("UserPlans").
+    Preload("UserPlans.Categories").
+    Preload("UserPlans.Categories.ExercisePlans").
+    Preload("UserPlans.Categories.ExercisePlans.Exercises").
+	Preload("UserPlans.Categories.MealPlans").
+	Preload("UserPlans.Categories.MealPlans.Meals").
+    First(&user, id).Error; err != nil {
+    r.log.Error("Ошибка при получении пользователя по ID",
+        "id", id,
+        "error", err.Error())
+    return nil, err
+}
 
 	r.log.Info("Пользователь найден успешно и его покупки успешно найдены",
 		"id", user.ID,
@@ -101,7 +108,7 @@ func (r *gormUserRepository) GeUserCategory(id uint) (*models.User, error) {
 
 func (r *gormUserRepository) GetUserSub(id uint) (*models.User, error) {
 	var user models.User
-	if err := r.db.Preload("UserSubscriptions.Category").First(&user, id).Error; err != nil {
+	if err := r.db.Preload("UserSubscriptions.Subscription.Categories").First(&user, id).Error; err != nil {
 		r.log.Error("Ошибка при получении пользователя по ID",
 			"id", id,
 			"error", err.Error())

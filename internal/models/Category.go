@@ -2,14 +2,14 @@ package models
 
 import "gorm.io/gorm"
 
-type Category struct {
+type Categories struct {
 	gorm.Model
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       int    `json:"price"`
 
-	ExercisePlans []ExercisePlan  `json:"exercise_plans"`
-	MealPlans     []MealPlan      `json:"meal_plans"`
+	ExercisePlans []ExercisePlan `json:"exercise_plans"`
+	MealPlans     []MealPlan     `json:"meal_plans"`
 }
 
 type CreateCategoryRequest struct {

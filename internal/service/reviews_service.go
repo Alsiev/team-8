@@ -33,9 +33,9 @@ func (s *reviewsService) CreateReview(req models.CreateReviewRequest, userID uin
 		return 0, fmt.Errorf("такого пользователя не существует")
 	}
 
-	if req.CategoryID == 0 {
+	if req.CategoriesID == 0 {
 		s.log.Warn("Такой категории нету",
-			"category_id", req.CategoryID)
+			"category_id", req.CategoriesID)
 		return 0, fmt.Errorf("такой категории не существует")
 
 	}
@@ -48,7 +48,7 @@ func (s *reviewsService) CreateReview(req models.CreateReviewRequest, userID uin
 
 	newReview := models.Reviews{
 		UserID:     req.UserID,
-		CategoryID: req.CategoryID,
+		CategoriesID: req.CategoriesID,
 		Rating:     req.Rating,
 		Content:    req.Content,
 	}
@@ -79,7 +79,7 @@ func (s *reviewsService) GetReview(id uint) (*models.GetReview, error) {
 
 	getReview := &models.GetReview{
 		ID:         req.ID,
-		CategoryID: req.CategoryID,
+		CategoriesID: req.CategoriesID,
 		UserID:     req.UserID,
 		Rating:     req.Rating,
 		Content:    req.Content,
@@ -109,7 +109,7 @@ func (s *reviewsService) GetReviewsByUser(userID uint) ([]models.GetReview, erro
 	for _, review := range reviews {
 		getReview := models.GetReview{
 			ID:         review.ID,
-			CategoryID: review.CategoryID,
+			CategoriesID: review.CategoriesID,
 			UserID:     review.UserID,
 			Rating:     review.Rating,
 			Content:    review.Content,
@@ -142,7 +142,7 @@ func (s *reviewsService) GetReviewsByCategory(categoryID uint) ([]models.GetRevi
 	for _, review := range reviews {
 		getReview := models.GetReview{
 			ID:         review.ID,
-			CategoryID: review.CategoryID,
+			CategoriesID: review.CategoriesID,
 			UserID:     review.UserID,
 			Rating:     review.Rating,
 			Content:    review.Content,

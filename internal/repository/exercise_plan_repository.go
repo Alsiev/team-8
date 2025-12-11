@@ -47,7 +47,7 @@ func (r *exercisePlanRepo) CreateExercisePlan(exercise *models.ExercisePlan) err
 func (r *exercisePlanRepo) GetByIDExercisePlan(id uint) (*models.ExercisePlan, error) {
 	var exercise models.ExercisePlan
 
-	if err := r.db.Preload("Exercises").Preload("Category").First(&exercise, id).Error; err != nil {
+	if err := r.db.Preload("Exercises").Preload("Categories").First(&exercise, id).Error; err != nil {
 		r.log.Error("error in GetByID function exercise_plan_repository.go")
 		return nil, err
 	}

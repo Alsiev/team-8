@@ -48,8 +48,10 @@ func (e *exercisePlanServices) CreatePlan(req models.CreateExercesicePlanRequest
 	}
 
 	exercise := &models.ExercisePlan{
+		Name:  req.Name,
+		Description: req.Description,
 		DurationWeeks: req.DurationWeeks,
-		CategoryID:    req.CategoryID,
+		CategoriesID:    req.CategoryID,
 	}
 
 	if err := e.exerciseRepo.CreateExercisePlan(exercise); err != nil {
@@ -99,6 +101,14 @@ func (e *exercisePlanServices) UpdatePlan(id uint, req models.UpdateExercesicePl
 
 	if req.DurationWeeks != nil {
 		plan.DurationWeeks = *req.DurationWeeks
+	}
+
+	if req.Name != nil {
+		plan.Name = *req.Name
+	}
+
+	if req.Description != nil {
+		plan.Description = *req.Description
 	}
 
 	if err := e.exerciseRepo.UpdateExercisePlan(plan); err != nil {

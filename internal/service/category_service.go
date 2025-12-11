@@ -8,11 +8,11 @@ import (
 )
 
 type CategoryServices interface {
-	CreateCategory(req models.CreateCategoryRequest) (*models.Category, error)
-	GetCategoryList()([]models.Category,error)
-	GetCategoryByID(id uint) (*models.Category,error)
-	GetWithPlans(id uint) (*models.Category, error)
-	UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Category, error)
+	CreateCategory(req models.CreateCategoryRequest) (*models.Categories, error)
+	GetCategoryList()([]models.Categories,error)
+	GetCategoryByID(id uint) (*models.Categories,error)
+	GetWithPlans(id uint) (*models.Categories, error)
+	UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Categories, error)
 	DeleteCategory(id uint) error
 }
 
@@ -29,7 +29,7 @@ func NewCategoryServices(category repository.CategoryRepo, log *slog.Logger) Cat
 	}
 }
 
-func (c *categoryServices) CreateCategory(req models.CreateCategoryRequest) (*models.Category, error) {
+func (c *categoryServices) CreateCategory(req models.CreateCategoryRequest) (*models.Categories, error) {
 	if req.Name == ""{
 		return  nil , errors.New("empty name by your category")
 	}
@@ -42,7 +42,7 @@ func (c *categoryServices) CreateCategory(req models.CreateCategoryRequest) (*mo
 		return  nil , errors.New("empty description by your category")
 	}
 
-	 category := &models.Category{
+	 category := &models.Categories{
 		Name: req.Name,
 		Description: req.Description,
 		Price: req.Price,
@@ -56,7 +56,7 @@ func (c *categoryServices) CreateCategory(req models.CreateCategoryRequest) (*mo
 	 return  category, nil
 }
 
-func (c *categoryServices) GetWithPlans(id uint) (*models.Category, error) {
+func (c *categoryServices) GetWithPlans(id uint) (*models.Categories, error) {
     cat , err := c.category.GetWithPlans(id)
 	if err != nil {
 		c.log.Error("error preloads or id")
@@ -67,7 +67,7 @@ func (c *categoryServices) GetWithPlans(id uint) (*models.Category, error) {
 }
 
 
-func (c *categoryServices) GetCategoryList()([]models.Category,error){
+func (c *categoryServices) GetCategoryList()([]models.Categories,error){
 	list , err := c.category.List()
 	if err != nil {
 		c.log.Error("error GetList in category_service.go")
@@ -78,7 +78,7 @@ func (c *categoryServices) GetCategoryList()([]models.Category,error){
 	return  list , nil
 }
 
-func (c *categoryServices) GetCategoryByID(id uint) (*models.Category,error) {
+func (c *categoryServices) GetCategoryByID(id uint) (*models.Categories,error) {
 	category, err := c.category.GetByID(id)
 	if err != nil {
 		c.log.Error("error GetCategoryByID in category_service.go")
@@ -88,18 +88,18 @@ func (c *categoryServices) GetCategoryByID(id uint) (*models.Category,error) {
 	return  category, nil
 }
 
-func (c *categoryServices) UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Category, error){
+func (c *categoryServices) UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Categories, error){
 	category ,err :=  c.category.GetByID(id)
 	if err != nil {
 		c.log.Error("error UpdateCategory function in category_service.go")
-		return &models.Category{} , err
+		return &models.Categories{} , err
 	}
 
 	c.Up(category, req)
 
 	if err := c.category.Update(category); err != nil {
 		c.log.Error("error UpdateCategory in category_service.go")
-		return &models.Category{}, nil
+		return &models.Categories{}, nil
 	}
 
 	return  category, nil
@@ -115,7 +115,7 @@ func (c *categoryServices) DeleteCategory(id uint) error{
 	return  nil
 }
 
-func(c *categoryServices) Up(cat *models.Category, req models.UpdateCategoryRequest){
+func(c *categoryServices) Up(cat *models.Categories, req models.UpdateCategoryRequest){
 	if req.Name != nil {
 		cat.Name = *req.Name
 	}
