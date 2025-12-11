@@ -19,6 +19,17 @@ func NewReviewsHandler(review service.ReviewsService, log *slog.Logger) *Reviews
 	return &ReviewsHandler{review: review, log: log}
 }
 
+// CreateReview godoc
+// @Summary Создать отзыв
+// @Description Создает новый отзыв пользователя о категории
+// @Tags Reviews
+// @Accept json
+// @Produce json
+// @Param review body models.CreateReviewRequest true "Данные отзыва"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews [post]
 func (h *ReviewsHandler) CreateReview(c *gin.Context) {
 	var req models.CreateReviewRequest
 
@@ -60,6 +71,16 @@ func (h *ReviewsHandler) CreateReview(c *gin.Context) {
 	})
 }
 
+// GetReview godoc
+// @Summary Получить отзыв по ID
+// @Description Возвращает отзыв по его идентификатору
+// @Tags Reviews
+// @Produce json
+// @Param id path int true "ID отзыва"
+// @Success 200 {object} models.GetReview
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews/{id} [get]
 func (h *ReviewsHandler) GetReview(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -91,6 +112,16 @@ func (h *ReviewsHandler) GetReview(c *gin.Context) {
 	c.JSON(http.StatusOK, review)
 }
 
+// GetReviewsByUser godoc
+// @Summary Получить отзывы пользователя
+// @Description Возвращает все отзывы указанного пользователя
+// @Tags Reviews
+// @Produce json
+// @Param userID path int true "ID пользователя"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews/user/{userID} [get]
 func (h *ReviewsHandler) GetReviewsByUser(c *gin.Context) {
 	userIDStr := c.Param("userID")
 
@@ -126,6 +157,16 @@ func (h *ReviewsHandler) GetReviewsByUser(c *gin.Context) {
 	})
 }
 
+// GetReviewsByCategory godoc
+// @Summary Получить отзывы по категории
+// @Description Возвращает отзывы по идентификатору категории
+// @Tags Reviews
+// @Produce json
+// @Param categoryID path int true "ID категории"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews/category/{categoryID} [get]
 func (h *ReviewsHandler) GetReviewsByCategory(c *gin.Context) {
 	categoryIDStr := c.Param("categoryID")
 
@@ -161,6 +202,20 @@ func (h *ReviewsHandler) GetReviewsByCategory(c *gin.Context) {
 	})
 }
 
+// UpdateReview godoc
+// @Summary Обновить отзыв
+// @Description Обновляет отзыв по ID. Требуется user_id владельца.
+// @Tags Reviews
+// @Accept json
+// @Produce json
+// @Param id path int true "ID отзыва"
+// @Param user_id query int false "ID пользователя-владельца"
+// @Param review body models.UpdateReviewRequest true "Данные для обновления"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews/{id} [put]
 func (h *ReviewsHandler) UpdateReview(c *gin.Context) {
 	var req models.UpdateReviewRequest
 
@@ -240,6 +295,18 @@ func (h *ReviewsHandler) UpdateReview(c *gin.Context) {
 	})
 }
 
+// DeleteReview godoc
+// @Summary Удалить отзыв
+// @Description Удаляет отзыв по ID. Требуется user_id владельца.
+// @Tags Reviews
+// @Produce json
+// @Param id path int true "ID отзыва"
+// @Param user_id query int true "ID пользователя-владельца"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reviews/{id} [delete]
 func (h *ReviewsHandler) DeleteReview(c *gin.Context) {
 	idStr := c.Param("id")
 
