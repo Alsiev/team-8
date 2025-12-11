@@ -13,6 +13,8 @@ type UserRepository interface {
 	Create(req *models.User) error
 	GetAllUser() ([]models.User, error)
 	GetUserByID(id uint) (*models.User, error)
+	GeUserCategory(id uint) (*models.User, error)
+	GetUserSub(id uint) (*models.User, error)
 	Update(user *models.User) error
 	Delete(id uint) error
 }
@@ -81,36 +83,36 @@ func (r *gormUserRepository) GetUserByID(id uint) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *gormUserRepository) GeUserCategory(id uint)(*models.User, error) {
+func (r *gormUserRepository) GeUserCategory(id uint) (*models.User, error) {
 	var user models.User
-	if err := r.db.Preload("UserPlans.Category").First(&user, id).Error; err != nil{
+	if err := r.db.Preload("UserPlans.Category").First(&user, id).Error; err != nil {
 		r.log.Error("Ошибка при получении пользователя по ID",
 			"id", id,
 			"error", err.Error())
-		return nil , err
+		return nil, err
 	}
 
 	r.log.Info("Пользователь найден успешно и его покупки успешно найдены",
 		"id", user.ID,
 		"name", user.Name)
 
-	return &user, nil 
+	return &user, nil
 }
 
 func (r *gormUserRepository) GetUserSub(id uint) (*models.User, error) {
 	var user models.User
-	if err := r.db.Preload("UserPlans.Category").First(&user, id).Error; err != nil{
+	if err := r.db.Preload("UserSubscriptions.Category").First(&user, id).Error; err != nil {
 		r.log.Error("Ошибка при получении пользователя по ID",
 			"id", id,
 			"error", err.Error())
-		return nil , err
+		return nil, err
 	}
 
 	r.log.Info("Пользователь найден успешно и его покупки успешно найдены",
 		"id", user.ID,
 		"name", user.Name)
 
-	return &user, nil 
+	return &user, nil
 }
 
 func (r *gormUserRepository) Update(req *models.User) error {

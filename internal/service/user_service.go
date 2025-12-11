@@ -15,6 +15,8 @@ type UserService interface {
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(id uint) (*models.User, error)
 	GetUserPlan(userID uint) (*models.Category, error)
+	GetUserCategory(userID uint) (*models.User, error)
+	GetUserSub(userID uint) (*models.User, error)
 	UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error)
 	Delete(id uint) error
 
@@ -121,14 +123,36 @@ func (s *userService) GetUserPlan(userID uint) (*models.Category, error) {
 
 	user, err := s.userRepo.GetUserByID(userID)
 	if err != nil {
+		s.log.Error("invalid user id")
 		return nil, err
 	}
 	category, err := s.categoryRepo.GetWithPlans(user.CategoryID)
 	if err != nil {
+		s.log.Error("invalid user category id")
 		return nil, err
 	}
 
 	return category, nil
+}
+
+func (s *userService) GetUserCategory(userID uint) (*models.User, error) {
+	user, err := s.userRepo.GeUserCategory(userID)
+	if err != nil {
+		s.log.Error("error user not found")
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *userService) GetUserSub(userID uint) (*models.User, error) {
+	user, err := s.userRepo.GetUserSub(userID)
+	if err != nil {
+		s.log.Error("error user not found")
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *userService) UpdateUser(id uint, req models.UpdateUserRequest) (*models.User, error) {

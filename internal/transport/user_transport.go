@@ -181,7 +181,6 @@ func (h *UserHandler) PaymentToAnother(c *gin.Context) {
 	secondUserIDstr := c.Param("secondUserID")
 
 	userID, err := strconv.ParseUint(userIDstr, 10, 64)
-	secondUserID, err := strconv.ParseUint(secondUserIDstr, 10, 64)
 
 	if err != nil {
 		h.log.Error("Ошибка при получении ID второго пользователя")
@@ -191,18 +190,21 @@ func (h *UserHandler) PaymentToAnother(c *gin.Context) {
 		return
 	}
 
+
+	categoryID, err := strconv.ParseUint(categoryIDstr, 10, 64)
+
 	if err != nil {
-		h.log.Error("Ошибка при получении ID пользователя")
+		h.log.Error("Ошибка при получении ID категории")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err": err,
 		})
 		return
 	}
 
-	categoryID, err := strconv.ParseUint(categoryIDstr, 10, 64)
+	secondUserID, err := strconv.ParseUint(secondUserIDstr, 10, 64)
 
 	if err != nil {
-		h.log.Error("Ошибка при получении ID категории")
+		h.log.Error("Ошибка при получении ID пользователя")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err": err,
 		})
@@ -289,6 +291,54 @@ func (h *UserHandler) GetUserWithPlan(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, user)
 }
 
+func (h *UserHandler) GetUserCategory(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	user, err := h.user.GetUserCategory(uint(userID))
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
+func (h *UserHandler) GetUserSubs(c *gin.Context) {
+	userIDstr := c.Param("userID")
+	userID, err := strconv.ParseUint(userIDstr, 10, 64)
+
+	if err != nil {
+		h.log.Warn("Ошибка при вводе ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	user, err := h.user.GetUserSub(uint(userID))
+	if err != nil {
+		h.log.Error("Ошибка при получении ID пользователя")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+		})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
 func (h *UserHandler) UserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	{
@@ -298,6 +348,8 @@ func (h *UserHandler) UserRoutes(r *gin.Engine) {
 		userGroup.GET("/", h.GetAllUser)
 		userGroup.GET("/:id", h.GetUserByID)
 		userGroup.GET("/plan/:id", h.GetUserWithPlan)
+		userGroup.GET("/userplans/:id", h.GetUserCategory)
+		userGroup.GET("usersub/:id", h.GetUserByID)
 		userGroup.PATCH("/:id", h.Update)
 		userGroup.DELETE("/:id", h.Delete)
 	}
