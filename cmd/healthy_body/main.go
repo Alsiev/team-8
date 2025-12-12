@@ -10,9 +10,11 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"time"
 
-	_ "healthy_body/internal/docs" // <- путь до сгенерированной swagger документации
+	_ "healthy_body/internal/docs"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -21,6 +23,16 @@ import (
 func main() {
 	db := config.SetUpDatabaseConnection()
 	server := gin.Default()
+
+	// 🚀 ВКЛЮЧАЕМ CORS — ЭТО ГЛАВНОЕ
+	server.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	if err := db.AutoMigrate(
 		&models.Categories{},
@@ -36,15 +48,14 @@ func main() {
 	); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
 
 	categoryRepo := repository.NewCategoryRepo(db, logger)
 	planRepo := repository.NewExercisePlanRepo(db, logger)
-
 	mealPlanRepo := repository.NewMealPlanRepository(db, logger)
 	mealPlanItemRepo := repository.NewMealPlanItemRepository(db, logger)
 	subRepo := repository.NewSubscriptionRepo(db, logger)
-
 	reviewsRepo := repository.NewReviewsRepository(db, logger)
 
 	categoryServices := service.NewCategoryServices(categoryRepo, logger)
@@ -79,8 +90,8 @@ func main() {
 	)
 
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	
-	if err := server.Run(); err != nil {
+
+	if err := server.Run(":8888"); err != nil {
 		log.Fatalf("не удалось запустить HTTP-сервер: %v", err)
 	}
 }
