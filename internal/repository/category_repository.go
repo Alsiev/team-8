@@ -53,7 +53,7 @@ func (c *categoryRepo) List() ([]models.Categories, error){
 
 func (c *categoryRepo) GetByID(id uint) (*models.Categories,error) {
 	var category models.Categories
-	if err := c.db.First(&category,id).Error; err != nil {
+	if err := c.db.Preload("ExercisePlans.Exercises").First(&category,id).Error; err != nil {
 		c.log.Error("error in GetByID function category_repository.go")
 		return nil, err
 	}

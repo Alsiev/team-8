@@ -65,8 +65,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
-	c.JSON(http.StatusCreated, resp)
+	c.JSON(http.StatusCreated, cat)
 }
 
 // GetByID godoc
@@ -94,8 +93,7 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, cat)
 }
 
 // GetList godoc
@@ -114,12 +112,7 @@ func (h *CategoryHandler) GetList(c *gin.Context) {
 		return
 	}
 
-	resp := make([]CategoryResponse, len(list))
-	for i, cat := range list {
-		resp[i] = CategoryResponse{ID: cat.ID, Name: cat.Name}
-	}
-
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, list)
 }
 
 // UpdateCategory godoc
@@ -156,8 +149,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	resp := CategoryResponse{ID: cat.ID, Name: cat.Name}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, cat)
 }
 
 // DeleteCategory godoc
